@@ -1,0 +1,352 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A200FC5E148B09CB0055A48F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A200FC5D148B09CB0055A48F /* UIKit.framework */; };
+		A200FC60148B09CB0055A48F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A200FC5F148B09CB0055A48F /* Foundation.framework */; };
+		A200FC62148B09CB0055A48F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A200FC61148B09CB0055A48F /* CoreGraphics.framework */; };
+		A200FC68148B09CB0055A48F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A200FC66148B09CB0055A48F /* InfoPlist.strings */; };
+		A200FC6A148B09CB0055A48F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A200FC69148B09CB0055A48F /* main.m */; };
+		A200FC6E148B09CB0055A48F /* SNAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A200FC6D148B09CB0055A48F /* SNAppDelegate.m */; };
+		A200FC71148B09CB0055A48F /* SNRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A200FC70148B09CB0055A48F /* SNRootViewController.m */; };
+		A200FC97148B0CFC0055A48F /* SNHomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A200FC96148B0CFC0055A48F /* SNHomeViewController.m */; };
+		A250E95C14AAFCC600A3B3B0 /* SNStackNavigationContentView.m in Sources */ = {isa = PBXBuildFile; fileRef = A250E95B14AAFCC500A3B3B0 /* SNStackNavigationContentView.m */; };
+		A2BA9850148B167500980A67 /* SNStackNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA984F148B167500980A67 /* SNStackNavigationController.m */; };
+		A2BA9854148B179A00980A67 /* UIViewController+SNStackNavigation.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA9853148B179A00980A67 /* UIViewController+SNStackNavigation.m */; };
+		A2BA9858148B180500980A67 /* SNStackNavigationControllerConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA9857148B180500980A67 /* SNStackNavigationControllerConstants.m */; };
+		A2BA985D148B260600980A67 /* SNStackedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA985C148B260600980A67 /* SNStackedViewController.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A200FC59148B09CB0055A48F /* SNStackNavigationSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SNStackNavigationSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A200FC5D148B09CB0055A48F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		A200FC5F148B09CB0055A48F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		A200FC61148B09CB0055A48F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		A200FC65148B09CB0055A48F /* SNStackNavigationSample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SNStackNavigationSample-Info.plist"; sourceTree = "<group>"; };
+		A200FC67148B09CB0055A48F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A200FC69148B09CB0055A48F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A200FC6B148B09CB0055A48F /* SNStackNavigationSample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SNStackNavigationSample-Prefix.pch"; sourceTree = "<group>"; };
+		A200FC6C148B09CB0055A48F /* SNAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SNAppDelegate.h; sourceTree = "<group>"; };
+		A200FC6D148B09CB0055A48F /* SNAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SNAppDelegate.m; sourceTree = "<group>"; };
+		A200FC6F148B09CB0055A48F /* SNRootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SNRootViewController.h; path = ../../SNRootViewController.h; sourceTree = "<group>"; };
+		A200FC70148B09CB0055A48F /* SNRootViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SNRootViewController.m; path = ../../SNRootViewController.m; sourceTree = "<group>"; };
+		A200FC95148B0CFC0055A48F /* SNHomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNHomeViewController.h; sourceTree = "<group>"; };
+		A200FC96148B0CFC0055A48F /* SNHomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNHomeViewController.m; sourceTree = "<group>"; };
+		A250E95A14AAFCC500A3B3B0 /* SNStackNavigationContentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackNavigationContentView.h; sourceTree = "<group>"; };
+		A250E95B14AAFCC500A3B3B0 /* SNStackNavigationContentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNStackNavigationContentView.m; sourceTree = "<group>"; };
+		A2BA984E148B167500980A67 /* SNStackNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackNavigationController.h; sourceTree = "<group>"; };
+		A2BA984F148B167500980A67 /* SNStackNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNStackNavigationController.m; sourceTree = "<group>"; };
+		A2BA9852148B179A00980A67 /* UIViewController+SNStackNavigation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SNStackNavigation.h"; sourceTree = "<group>"; };
+		A2BA9853148B179A00980A67 /* UIViewController+SNStackNavigation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+SNStackNavigation.m"; sourceTree = "<group>"; };
+		A2BA9856148B180500980A67 /* SNStackNavigationControllerConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackNavigationControllerConstants.h; sourceTree = "<group>"; };
+		A2BA9857148B180500980A67 /* SNStackNavigationControllerConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNStackNavigationControllerConstants.m; sourceTree = "<group>"; };
+		A2BA985B148B260600980A67 /* SNStackedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackedViewController.h; sourceTree = "<group>"; };
+		A2BA985C148B260600980A67 /* SNStackedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNStackedViewController.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A200FC56148B09CB0055A48F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A200FC5E148B09CB0055A48F /* UIKit.framework in Frameworks */,
+				A200FC60148B09CB0055A48F /* Foundation.framework in Frameworks */,
+				A200FC62148B09CB0055A48F /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A200FC4E148B09CB0055A48F = {
+			isa = PBXGroup;
+			children = (
+				A2BA984C148B164900980A67 /* SNStackNavigation */,
+				A200FC63148B09CB0055A48F /* SNStackNavigationSample */,
+				A200FC5C148B09CB0055A48F /* Frameworks */,
+				A200FC5A148B09CB0055A48F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A200FC5A148B09CB0055A48F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A200FC59148B09CB0055A48F /* SNStackNavigationSample.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A200FC5C148B09CB0055A48F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A200FC5D148B09CB0055A48F /* UIKit.framework */,
+				A200FC5F148B09CB0055A48F /* Foundation.framework */,
+				A200FC61148B09CB0055A48F /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A200FC63148B09CB0055A48F /* SNStackNavigationSample */ = {
+			isa = PBXGroup;
+			children = (
+				A200FC64148B09CB0055A48F /* Supporting Files */,
+				A200FC92148B0C630055A48F /* ViewControllers */,
+				A200FC6C148B09CB0055A48F /* SNAppDelegate.h */,
+				A200FC6D148B09CB0055A48F /* SNAppDelegate.m */,
+			);
+			path = SNStackNavigationSample;
+			sourceTree = "<group>";
+		};
+		A200FC64148B09CB0055A48F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				A200FC65148B09CB0055A48F /* SNStackNavigationSample-Info.plist */,
+				A200FC66148B09CB0055A48F /* InfoPlist.strings */,
+				A200FC69148B09CB0055A48F /* main.m */,
+				A200FC6B148B09CB0055A48F /* SNStackNavigationSample-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		A200FC92148B0C630055A48F /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				A200FC94148B0CCF0055A48F /* Home */,
+				A200FC93148B0CAA0055A48F /* Root */,
+				A2BA985A148B257500980A67 /* Stacked */,
+			);
+			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		A200FC93148B0CAA0055A48F /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				A200FC6F148B09CB0055A48F /* SNRootViewController.h */,
+				A200FC70148B09CB0055A48F /* SNRootViewController.m */,
+			);
+			path = Root;
+			sourceTree = "<group>";
+		};
+		A200FC94148B0CCF0055A48F /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				A200FC95148B0CFC0055A48F /* SNHomeViewController.h */,
+				A200FC96148B0CFC0055A48F /* SNHomeViewController.m */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		A2BA984C148B164900980A67 /* SNStackNavigation */ = {
+			isa = PBXGroup;
+			children = (
+				A2BA984E148B167500980A67 /* SNStackNavigationController.h */,
+				A2BA984F148B167500980A67 /* SNStackNavigationController.m */,
+				A2BA9856148B180500980A67 /* SNStackNavigationControllerConstants.h */,
+				A2BA9857148B180500980A67 /* SNStackNavigationControllerConstants.m */,
+				A250E95A14AAFCC500A3B3B0 /* SNStackNavigationContentView.h */,
+				A250E95B14AAFCC500A3B3B0 /* SNStackNavigationContentView.m */,
+				A2BA9852148B179A00980A67 /* UIViewController+SNStackNavigation.h */,
+				A2BA9853148B179A00980A67 /* UIViewController+SNStackNavigation.m */,
+			);
+			path = SNStackNavigation;
+			sourceTree = "<group>";
+		};
+		A2BA985A148B257500980A67 /* Stacked */ = {
+			isa = PBXGroup;
+			children = (
+				A2BA985B148B260600980A67 /* SNStackedViewController.h */,
+				A2BA985C148B260600980A67 /* SNStackedViewController.m */,
+			);
+			path = Stacked;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A200FC58148B09CB0055A48F /* SNStackNavigationSample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A200FC8C148B09CC0055A48F /* Build configuration list for PBXNativeTarget "SNStackNavigationSample" */;
+			buildPhases = (
+				A200FC55148B09CB0055A48F /* Sources */,
+				A200FC56148B09CB0055A48F /* Frameworks */,
+				A200FC57148B09CB0055A48F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SNStackNavigationSample;
+			productName = StackedNavigationSample;
+			productReference = A200FC59148B09CB0055A48F /* SNStackNavigationSample.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A200FC50148B09CB0055A48F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = A200FC53148B09CB0055A48F /* Build configuration list for PBXProject "SNStackNavigationSample" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A200FC4E148B09CB0055A48F;
+			productRefGroup = A200FC5A148B09CB0055A48F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A200FC58148B09CB0055A48F /* SNStackNavigationSample */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A200FC57148B09CB0055A48F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A200FC68148B09CB0055A48F /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A200FC55148B09CB0055A48F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A200FC6A148B09CB0055A48F /* main.m in Sources */,
+				A200FC6E148B09CB0055A48F /* SNAppDelegate.m in Sources */,
+				A200FC71148B09CB0055A48F /* SNRootViewController.m in Sources */,
+				A200FC97148B0CFC0055A48F /* SNHomeViewController.m in Sources */,
+				A2BA9850148B167500980A67 /* SNStackNavigationController.m in Sources */,
+				A2BA9854148B179A00980A67 /* UIViewController+SNStackNavigation.m in Sources */,
+				A2BA9858148B180500980A67 /* SNStackNavigationControllerConstants.m in Sources */,
+				A2BA985D148B260600980A67 /* SNStackedViewController.m in Sources */,
+				A250E95C14AAFCC600A3B3B0 /* SNStackNavigationContentView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		A200FC66148B09CB0055A48F /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A200FC67148B09CB0055A48F /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		A200FC8A148B09CC0055A48F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		A200FC8B148B09CC0055A48F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A200FC8D148B09CC0055A48F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SNStackNavigationSample/SNStackNavigationSample-Prefix.pch";
+				INFOPLIST_FILE = "SNStackNavigationSample/SNStackNavigationSample-Info.plist";
+				PRODUCT_NAME = SNStackNavigationSample;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		A200FC8E148B09CC0055A48F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SNStackNavigationSample/SNStackNavigationSample-Prefix.pch";
+				INFOPLIST_FILE = "SNStackNavigationSample/SNStackNavigationSample-Info.plist";
+				PRODUCT_NAME = SNStackNavigationSample;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A200FC53148B09CB0055A48F /* Build configuration list for PBXProject "SNStackNavigationSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A200FC8A148B09CC0055A48F /* Debug */,
+				A200FC8B148B09CC0055A48F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A200FC8C148B09CC0055A48F /* Build configuration list for PBXNativeTarget "SNStackNavigationSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A200FC8D148B09CC0055A48F /* Debug */,
+				A200FC8E148B09CC0055A48F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A200FC50148B09CB0055A48F /* Project object */;
+}
