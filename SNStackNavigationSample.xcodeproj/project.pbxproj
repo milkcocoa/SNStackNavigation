@@ -20,6 +20,7 @@
 		A2BA9854148B179A00980A67 /* UIViewController+SNStackNavigation.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA9853148B179A00980A67 /* UIViewController+SNStackNavigation.m */; };
 		A2BA9858148B180500980A67 /* SNStackNavigationControllerConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA9857148B180500980A67 /* SNStackNavigationControllerConstants.m */; };
 		A2BA985D148B260600980A67 /* SNStackedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA985C148B260600980A67 /* SNStackedViewController.m */; };
+		A2F7E1E2150120FE007DBEE3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2F7E1E1150120FE007DBEE3 /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		A2BA9857148B180500980A67 /* SNStackNavigationControllerConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNStackNavigationControllerConstants.m; sourceTree = "<group>"; };
 		A2BA985B148B260600980A67 /* SNStackedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackedViewController.h; sourceTree = "<group>"; };
 		A2BA985C148B260600980A67 /* SNStackedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNStackedViewController.m; sourceTree = "<group>"; };
+		A2F7E1E1150120FE007DBEE3 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A2F7E1E2150120FE007DBEE3 /* QuartzCore.framework in Frameworks */,
 				A200FC5E148B09CB0055A48F /* UIKit.framework in Frameworks */,
 				A200FC60148B09CB0055A48F /* Foundation.framework in Frameworks */,
 				A200FC62148B09CB0055A48F /* CoreGraphics.framework in Frameworks */,
@@ -84,9 +87,10 @@
 		A200FC5C148B09CB0055A48F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A200FC5D148B09CB0055A48F /* UIKit.framework */,
-				A200FC5F148B09CB0055A48F /* Foundation.framework */,
 				A200FC61148B09CB0055A48F /* CoreGraphics.framework */,
+				A200FC5F148B09CB0055A48F /* Foundation.framework */,
+				A2F7E1E1150120FE007DBEE3 /* QuartzCore.framework */,
+				A200FC5D148B09CB0055A48F /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
