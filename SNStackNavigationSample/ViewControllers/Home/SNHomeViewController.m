@@ -7,6 +7,8 @@
 
 #import "SNHomeViewController.h"
 
+#import <objc/message.h>
+
 #import "SNStackNavigationController.h"
 #import "SNStackedViewController.h"
 
@@ -23,6 +25,13 @@ static NSString * const _tabTitles[_tabMax] =
 {
     @"Item 1",
     @"Item 2",
+};
+
+
+static NSString * const _tabSelectors[_tabMax] =
+{
+    @"showTab1ViewController",
+    @"showTab2ViewController",
 };
 
 
@@ -46,6 +55,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 #pragma mark - Tab Items
 
 @property (nonatomic)   SNStackedViewController     *_stackedViewController1;
+@property (nonatomic)   SNStackedViewController     *_stackedViewController2;
 
 #pragma mark - Private Methods
 
@@ -67,6 +77,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 @synthesize _navigationController;
 @synthesize _stackedViewController1;
+@synthesize _stackedViewController2;
 @synthesize _tabTableView;
 
 
@@ -192,7 +203,14 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 - (void)showTab2ViewController
 {
+    if (!_stackedViewController2)
+    {
+        _stackedViewController2 = [[SNStackedViewController alloc] initWithNibName:nil bundle:nil];
+    }
 
+    [_navigationController pushViewController:_stackedViewController2
+                           fromViewController:nil
+                                     animated:YES];
 }
 
 
@@ -236,7 +254,13 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 - (void)tableView:(UITableView *)tableView
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSInteger   row;
+    SEL         selector;
 
+    row         = [indexPath row];
+    selector    = NSSelectorFromString(_tabSelectors[row]);
+
+    objc_msgSend(self, selector);
 }
 
 
