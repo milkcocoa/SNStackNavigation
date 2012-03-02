@@ -33,21 +33,13 @@ typedef enum
 
 typedef enum
 {
-    _SNStackNavigationMainStateNone,
-    _SNStackNavigationMainStateL,
-    _SNStackNavigationMainStateLR,
-    _SNStackNavigationMainStateLRMR,
-    _SNStackNavigationMainStateMLLR,
-    _SNStackNavigationMainStateMLLRMR,
-} _SNStackNavigationMainStateType;
-
-
-typedef enum
-{
-    _SNStackNavigationSubstateNone,
-    _SNStackNavigationSubstateR,
-    _SNStackNavigationSubstateLR,
-} _SNStackNavigationSubstateType;
+    _SNStackNavigationStateNone,
+    _SNStackNavigationStateL,
+    _SNStackNavigationStateLR,
+    _SNStackNavigationStateLRMR,
+    _SNStackNavigationStateMLLR,
+    _SNStackNavigationStateMLLRMR,
+} _SNStackNavigationStateType;
 
 
 #define CONTENT_VIEW (SNStackNavigationContentView *)[self view]
@@ -101,7 +93,7 @@ typedef enum
 
 - (void)_onPanGesture:(UIPanGestureRecognizer *)recognizer;
 
-- (_SNStackNavigationMainStateType)_decideMainState;
+- (_SNStackNavigationStateType)_decideMainState;
 
 - (void)_moveToStateL:(_SNStackNavigationDragDirectionType)dragDirection;
 - (void)_cutDownViewControllersExceptRootViewController;
@@ -145,12 +137,12 @@ typedef enum
 {
     switch ([self _decideMainState])
     {
-        case _SNStackNavigationMainStateNone:
+        case _SNStackNavigationStateNone:
         {
             return nil;
         }
 
-        case _SNStackNavigationMainStateL:
+        case _SNStackNavigationStateL:
         {
             return [_viewControllers objectAtIndex:0];
         }
@@ -284,34 +276,34 @@ typedef enum
 }
 
 
-- (_SNStackNavigationMainStateType)_decideMainState
+- (_SNStackNavigationStateType)_decideMainState
 {
     if (!LEFT_VIEW)
     {
-        return _SNStackNavigationMainStateNone;
+        return _SNStackNavigationStateNone;
     }
 
     if (!RIGHT_VIEW)
     {
-        return _SNStackNavigationMainStateL;
+        return _SNStackNavigationStateL;
     }
 
     if (!MORE_LEFT_VIEW && !MORE_RIGHT_VIEW)
     {
-        return _SNStackNavigationMainStateLR;
+        return _SNStackNavigationStateLR;
     }
 
     if (!MORE_LEFT_VIEW)
     {
-        return _SNStackNavigationMainStateLRMR;
+        return _SNStackNavigationStateLRMR;
     }
 
     if (!MORE_RIGHT_VIEW)
     {
-        return _SNStackNavigationMainStateMLLR;
+        return _SNStackNavigationStateMLLR;
     }
 
-    return _SNStackNavigationMainStateMLLRMR;
+    return _SNStackNavigationStateMLLRMR;
 }
 
 
@@ -685,13 +677,13 @@ typedef enum
 
     switch ([self _decideMainState])
     {
-        case _SNStackNavigationMainStateL:
+        case _SNStackNavigationStateL:
         {
             [self _moveToStateL:dragDirection];
             break;
         }
 
-        case _SNStackNavigationMainStateLR:
+        case _SNStackNavigationStateLR:
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
@@ -745,7 +737,7 @@ typedef enum
             break;
         }
 
-        case _SNStackNavigationMainStateLRMR:
+        case _SNStackNavigationStateLRMR:
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
@@ -778,7 +770,7 @@ typedef enum
             break;
         }
 
-        case _SNStackNavigationMainStateMLLR:
+        case _SNStackNavigationStateMLLR:
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
@@ -843,7 +835,7 @@ typedef enum
             break;
         }
 
-        case _SNStackNavigationMainStateMLLRMR:
+        case _SNStackNavigationStateMLLRMR:
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
@@ -899,7 +891,7 @@ typedef enum
     }
     else
     {
-        _SNStackNavigationMainStateType state;
+        _SNStackNavigationStateType state;
 
         dragDirection = _SNStackNavigationDragDirectionNone;
         if (location.x < lastTouchLocation.x)
@@ -913,11 +905,11 @@ typedef enum
 
         state = [self _decideMainState];
 
-        if (state == _SNStackNavigationMainStateL)
+        if (state == _SNStackNavigationStateL)
         {
             LEFT_VIEW_SET_X(startPointOfLeftView.x + translation.x * _SNStackNavigationMoveFrictionCoEfficient);
         }
-        else if (state == _SNStackNavigationMainStateLR)
+        else if (state == _SNStackNavigationStateLR)
         {
             if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
             {
@@ -962,7 +954,7 @@ typedef enum
                 }
             }
         }
-        else if (state == _SNStackNavigationMainStateLRMR)
+        else if (state == _SNStackNavigationStateLRMR)
         {
             if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= -[self _tabFoldedWidth])
             {
@@ -1027,7 +1019,7 @@ typedef enum
                 }
             }
         }
-        else if (state == _SNStackNavigationMainStateMLLR)
+        else if (state == _SNStackNavigationStateMLLR)
         {
             if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
             {
@@ -1072,7 +1064,7 @@ typedef enum
                 }
             }
         }
-        else if (state == _SNStackNavigationMainStateMLLRMR)
+        else if (state == _SNStackNavigationStateMLLRMR)
         {
             if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= -[self _tabFoldedWidth])
             {
