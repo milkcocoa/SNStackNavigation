@@ -191,7 +191,7 @@
 		A200FC50148B09CB0055A48F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = A200FC53148B09CB0055A48F /* Build configuration list for PBXProject "SNStackNavigationSample" */;
 			compatibilityVersion = "Xcode 3.2";
