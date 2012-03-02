@@ -1157,15 +1157,25 @@ typedef enum
         fromViewController:(UIViewController *)fromViewController
                   animated:(BOOL)animated
 {
-    __block CGRect frame;
+    CGFloat         viewWidth;
+    __block CGRect  frame;
+    NSUInteger      subviewsCount;
+    void (^animationsBlock)(void);
+
+    viewWidth = [viewController contentWidthForViewInStackNavigation];
 
     frame = CGRectMake(CGRectGetMaxX([[fromViewController view] frame]),
                        0,
-                       [viewController contentWidthForViewInStackNavigation],
+                       viewWidth,
                        CGRectGetHeight([[self view] bounds]));
 
     if (!fromViewController)
     {
+        if ([_viewControllers count])
+        {
+            frame.origin.x = CGRectGetMinX(LEFT_VIEW_FRAME);
+        }
+
         [_viewControllers enumerateObjectsWithOptions:NSEnumerationReverse
                                             usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
          {
@@ -1217,11 +1227,32 @@ typedef enum
 
     [STACKED_VIEWS addSubview:[viewController view]];
 
-    if ([[STACKED_VIEWS subviews] count])
-    {
-        void (^animationsBlock)(void);
-        NSUInteger  subviewsCount;
+    subviewsCount = [STACKED_VIEWS_CONCRETE count];
 
+    if (subviewsCount == 1)
+    {
+        animationsBlock = ^(void)
+        {
+            LEFT_VIEW_SET_X(tabWidth - minimumTabWidth);
+        };
+
+        [CONTENT_VIEW setMoreRightView:nil];
+        [CONTENT_VIEW setRightView:nil];
+        [CONTENT_VIEW setLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:subviewsCount - 1]];
+        [CONTENT_VIEW setMoreLeftView:nil];
+
+        if (animated)
+        {
+            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                             animations:animationsBlock];
+        }
+        else
+        {
+            animationsBlock();
+        }
+    }
+    else
+    {
         animationsBlock = ^(void)
         {
             RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
@@ -1229,16 +1260,7 @@ typedef enum
             MORE_LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
         };
 
-        subviewsCount = [STACKED_VIEWS_CONCRETE count];
-
-        if (subviewsCount == 1)
-        {
-            [CONTENT_VIEW setMoreRightView:nil];
-            [CONTENT_VIEW setRightView:nil];
-            [CONTENT_VIEW setLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:subviewsCount - 1]];
-            [CONTENT_VIEW setMoreLeftView:nil];
-        }
-        else if (subviewsCount == 2)
+        if (subviewsCount == 2)
         {
             [CONTENT_VIEW setMoreRightView:nil];
             [CONTENT_VIEW setRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:subviewsCount - 1]];

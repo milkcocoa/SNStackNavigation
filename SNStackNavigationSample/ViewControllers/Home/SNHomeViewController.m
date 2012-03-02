@@ -171,15 +171,22 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 - (void)showTab1ViewController
 {
-    if (!_stackedViewController1)
+    BOOL animated;
+
+    if (_stackedViewController1)
     {
-        [self set_stackedViewController1:[[SNStackedViewController alloc] initWithNibName:nil bundle:nil]];
+        animated = YES;
+    }
+    else
+    {
+        _stackedViewController1 = [[SNStackedViewController alloc] initWithNibName:nil bundle:nil];
         [_stackedViewController1 setText:@"RootView Menu 1"];
+        animated = NO;
     }
 
     [_navigationController pushViewController:_stackedViewController1
                            fromViewController:nil
-                                     animated:YES];
+                                     animated:animated];
 }
 
 
