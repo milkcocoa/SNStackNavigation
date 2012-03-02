@@ -26,7 +26,7 @@ static NSString * const _tabTitles[_tabMax] =
 };
 
 
-static CGFloat  _SNHomeViewControllerTabWidth   = 200;
+static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 
 #pragma mark - SNHomeViewController () Interface

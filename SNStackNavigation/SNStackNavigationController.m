@@ -15,7 +15,7 @@
 #import "SNStackNavigationContentView.h"
 
 
-static CGFloat const _SNStackNavigationDefaultToolbarWidth          = 200;
+static CGFloat const _SNStackNavigationDefaultToolbarWidth          = 292;
 static CGFloat const _SNStackNavigationDefaultToolbarMinimumWidth   = 72;
 static CGFloat const _SNStackNavigationCutDownWidth                 = 120;
 static CGFloat const _SNStackNavigationMoveFrictionCoEfficient      = 0.5;
