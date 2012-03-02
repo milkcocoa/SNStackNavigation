@@ -17,7 +17,7 @@
 
 #pragma mark - Private Properties
 
-@property (strong, nonatomic, readwrite)    UIView  *stackedViews;
+@property (nonatomic, readwrite)    UIView  *stackedViews;
 
 #pragma mark - Private methods
 

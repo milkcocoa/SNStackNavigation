@@ -40,12 +40,12 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 #pragma mark - Private Methods
 
-@property (strong, nonatomic)   UITableView                 *_tabTableView;
-@property (strong, nonatomic)   SNStackNavigationController *_navigationController;
+@property (nonatomic)   UITableView                 *_tabTableView;
+@property (nonatomic)   SNStackNavigationController *_navigationController;
 
 #pragma mark - Tab Items
 
-@property (strong, nonatomic)   SNStackedViewController     *_stackedViewController1;
+@property (nonatomic)   SNStackedViewController     *_stackedViewController1;
 
 #pragma mark - Private Methods
 
@@ -125,7 +125,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
     frame = CGRectMake(0, 0, _SNHomeViewControllerTabWidth, CGRectGetHeight([[self view] bounds]));
 
-    [self set_tabTableView:[[UITableView alloc] initWithFrame:frame]];
+    _tabTableView = [[UITableView alloc] initWithFrame:frame];
     [[self view] addSubview:_tabTableView];
 
     [_tabTableView setDataSource:self];
@@ -139,7 +139,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 - (void)_initializeStackNavigationController
 {
-    [self set_navigationController:[[SNStackNavigationController alloc] initWithNibName:nil bundle:nil]];
+    _navigationController = [[SNStackNavigationController alloc] initWithNibName:nil bundle:nil];
     [[self view] addSubview:[_navigationController view]];
 
     [[_navigationController view] setAutoresizingMask:(UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight)];
@@ -204,7 +204,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 {
     static NSString * const reuseIdentifier = @"cell";
 
-    NSUInteger  row;
+    NSInteger row;
 
     UITableViewCell *cell;
 

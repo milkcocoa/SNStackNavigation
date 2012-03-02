@@ -12,13 +12,13 @@
 
 #pragma mark - Public Properties
 
-@property (nonatomic)   CGFloat                 tabWidth;
-@property (nonatomic)   CGFloat                 minimumTabWidth;
+@property (nonatomic)   CGFloat         tabWidth;
+@property (nonatomic)   CGFloat         minimumTabWidth;
 
-@property (strong, readonly, nonatomic) UIView  *stackedViews;
-@property (strong, nonatomic)   UIView          *leftView;
-@property (strong, nonatomic)   UIView          *rightView;
-@property (strong, nonatomic)   UIView          *moreLeftView;
-@property (strong, nonatomic)   UIView          *moreRightView;
+@property (readonly, nonatomic) UIView  *stackedViews;
+@property (nonatomic)   UIView          *leftView;
+@property (nonatomic)   UIView          *rightView;
+@property (nonatomic)   UIView          *moreLeftView;
+@property (nonatomic)   UIView          *moreRightView;
 
 @end
