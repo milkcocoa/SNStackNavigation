@@ -20,7 +20,6 @@
 
 @property (nonatomic, readonly) UIViewController    *rootViewController;
 @property (nonatomic, readonly) NSArray             *viewControllers;
-@property (nonatomic, readonly) UIViewController    *visibleViewController;
 
 @property (nonatomic)           CGFloat             tabWidth;
 @property (nonatomic)           CGFloat             minimumTabWidth;

@@ -15,6 +15,9 @@
 @property (nonatomic)   CGFloat         tabWidth;
 @property (nonatomic)   CGFloat         minimumTabWidth;
 
+@property (readonly, nonatomic) CALayer *leftMaskLayer;
+@property (readonly, nonatomic) CALayer *rightMaskLayer;
+
 @property (readonly, nonatomic) UIView  *stackedViews;
 @property (nonatomic)   UIView          *leftView;
 @property (nonatomic)   UIView          *rightView;

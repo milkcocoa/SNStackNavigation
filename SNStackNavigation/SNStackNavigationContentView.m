@@ -9,6 +9,8 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "SNStackNavigationControllerConstants.h"
+
 
 #pragma mark - SNStackNavigationContentView () Interface
 
@@ -17,11 +19,14 @@
 
 #pragma mark - Private Properties
 
+@property (nonatomic, readwrite)    CALayer *leftMaskLayer;
+@property (nonatomic, readwrite)    CALayer *rightMaskLayer;
 @property (nonatomic, readwrite)    UIView  *stackedViews;
 
 #pragma mark - Private methods
 
 - (void)_initializeStackedViews;
+- (void)_initializeMaskLayers;
 
 @end
 
@@ -35,10 +40,12 @@
 #pragma mark - Properties
 
 
+@synthesize leftMaskLayer;
 @synthesize leftView;
 @synthesize minimumTabWidth;
 @synthesize moreLeftView;
 @synthesize moreRightView;
+@synthesize rightMaskLayer;
 @synthesize rightView;
 @synthesize stackedViews;
 @synthesize tabWidth;
@@ -75,6 +82,7 @@
     if (self)
     {
         [self _initializeStackedViews];
+        [self _initializeMaskLayers];
     }
 
     return self;
@@ -83,16 +91,40 @@
 
 - (void)_initializeStackedViews
 {
-    [self setStackedViews:[[UIView alloc] initWithFrame:[self bounds]]];
+    stackedViews = [[UIView alloc] initWithFrame:[self bounds]];
     [self addSubview:stackedViews];
 
     [stackedViews setAutoresizesSubviews:YES];
+    [stackedViews setClipsToBounds:YES];
+
+    [[stackedViews layer] setCornerRadius:SNStackNavigationCornerRadius];
+    [[stackedViews layer] setMasksToBounds:YES];
+}
+
+
+- (void)_initializeMaskLayers
+{
+    leftMaskLayer = [CALayer layer];
+
+    [leftMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
+    [leftMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
+
+    rightMaskLayer = [CALayer layer];
+    [rightMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
+    [rightMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
 }
 
 
 - (void)layoutSubviews
 {
-    [stackedViews setFrame:CGRectMake(tabWidth, 0, CGRectGetWidth([self bounds]) - tabWidth, CGRectGetHeight([self bounds]))];
+    CGFloat height;
+
+    height = CGRectGetHeight([self bounds]);
+
+    [stackedViews setFrame:CGRectMake(minimumTabWidth, 0, CGRectGetWidth([self bounds]) - minimumTabWidth, height)];
+
+    [leftMaskLayer setFrame:CGRectMake(0, 0, CGRectGetWidth([leftMaskLayer frame]), height)];
+    [rightMaskLayer setFrame:CGRectMake(-SNStackNavigationCornerRadius, 0, CGRectGetWidth([rightMaskLayer frame]), height)];
 }
 
 

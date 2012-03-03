@@ -9,3 +9,5 @@
 
 
 extern char const * const SNStackNavigationControllerKey;
+
+extern CGFloat const SNStackNavigationCornerRadius;

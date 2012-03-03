@@ -20,7 +20,7 @@ static CGFloat const _SNStackNavigationDefaultToolbarMinimumWidth   = 72;
 static CGFloat const _SNStackNavigationCutDownWidth                 = 120;
 static CGFloat const _SNStackNavigationMoveFrictionCoEfficient      = 0.5;
 static CGFloat const _SNStackNavigationAnimationDuration            = 0.2;
-static CGFloat const _SNStackNavigationBounceAnimationDuration      = 0.1;
+static CGFloat const _SNStackNavigationBounceAnimationDuration      = 0.2;
 static CGFloat const _SNStackNavigationMoveOffset                   = 10;
 
 typedef enum
@@ -78,11 +78,13 @@ typedef enum
 
 #pragma mark - Private Properties
 
-@property (strong, nonatomic)   NSMutableArray  *_viewControllers;
+@property (nonatomic)   CGFloat         _tabEndX;
+@property (nonatomic)   NSMutableArray  *_viewControllers;
 
 #pragma mark - Private Methods
 
 - (void)_initializeViewControllers;
+
 - (void)_initializeContentView;
 - (void)_initializePanGesture;
 
@@ -92,6 +94,8 @@ typedef enum
 - (void)_unregisterViewController:(UIViewController *)viewController;
 
 - (void)_onPanGesture:(UIPanGestureRecognizer *)recognizer;
+
+- (void)_updateCornerRadius;
 
 - (_SNStackNavigationStateType)_decideMainState;
 
@@ -114,11 +118,34 @@ typedef enum
 #pragma mark - Properties
 
 
+@synthesize _tabEndX;
 @synthesize _viewControllers;
 
 @synthesize delegate;
 @synthesize minimumTabWidth;
 @synthesize tabWidth;
+
+
+- (void)setMinimumTabWidth:(CGFloat)aMinimumTabWidth
+{
+    if (minimumTabWidth != aMinimumTabWidth)
+    {
+        minimumTabWidth = aMinimumTabWidth;
+
+        _tabEndX = tabWidth - minimumTabWidth;
+    }
+}
+
+
+- (void)setTabWidth:(CGFloat)aTabWidth
+{
+    if (tabWidth != aTabWidth)
+    {
+        tabWidth = aTabWidth;
+
+        _tabEndX = tabWidth - minimumTabWidth;
+    }
+}
 
 
 - (UIViewController *)rootViewController
@@ -133,30 +160,6 @@ typedef enum
 }
 
 
-- (UIViewController *)visibleViewController
-{
-    switch ([self _decideMainState])
-    {
-        case _SNStackNavigationStateNone:
-        {
-            return nil;
-        }
-
-        case _SNStackNavigationStateL:
-        {
-            return [_viewControllers objectAtIndex:0];
-        }
-
-        default:
-        {
-            break;
-        }
-    }
-
-    return nil;
-}
-
-
 #pragma mark -
 
 
@@ -168,6 +171,7 @@ typedef enum
     {
         tabWidth        = _SNStackNavigationDefaultToolbarWidth;
         minimumTabWidth = _SNStackNavigationDefaultToolbarMinimumWidth;
+        _tabEndX        = tabWidth - minimumTabWidth;
 
         [self _initializeViewControllers];
     }
@@ -318,7 +322,7 @@ typedef enum
 
     animationBlock = ^(void)
     {
-        LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset * offsetDirection);
+        LEFT_VIEW_SET_X(_tabEndX +  _SNStackNavigationMoveOffset * offsetDirection);
     };
 
     completionBlock = ^(BOOL finished)
@@ -327,7 +331,7 @@ typedef enum
 
         bounceBlock = ^(void)
         {
-            LEFT_VIEW_SET_X(0);
+            LEFT_VIEW_SET_X(_tabEndX);
         };
 
         [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
@@ -363,6 +367,8 @@ typedef enum
 
     [CONTENT_VIEW setRightView:nil];
     [CONTENT_VIEW setMoreRightView:nil];
+
+    [self _updateCornerRadius];
 }
 
 
@@ -375,21 +381,18 @@ typedef enum
     {
         animationBlock = ^(void)
         {
-            LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+            LEFT_VIEW_SET_X(0);
             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
         };
 
         completionBlock = ^(BOOL finished)
         {
-            CGFloat leftViewX;
             void (^bounceAnimationBlock)(void);
             void (^bounceCompletionBlock)(BOOL);
 
-            leftViewX = -[self _tabFoldedWidth];
-
             bounceAnimationBlock = ^(void)
             {
-                LEFT_VIEW_SET_X(leftViewX + _SNStackNavigationMoveOffset);
+                LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
                 // -1 is so as not to appear background for an instant
                 RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - 1);
             };
@@ -400,7 +403,7 @@ typedef enum
 
                 bounceBackAnimation = ^(void)
                 {
-                    LEFT_VIEW_SET_X(leftViewX);
+                    LEFT_VIEW_SET_X(0);
                     RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                 };
 
@@ -422,7 +425,7 @@ typedef enum
         animationBlock = ^(void)
         {
             // TODO: 移動距離に応じて変化させる
-            LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset * offsetDirection);
+            LEFT_VIEW_SET_X(_tabEndX + _SNStackNavigationMoveOffset * offsetDirection);
             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
         };
 
@@ -432,7 +435,7 @@ typedef enum
 
             bounceBlock = ^(void)
             {
-                LEFT_VIEW_SET_X(0);
+                LEFT_VIEW_SET_X(_tabEndX);
                 RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
             };
 
@@ -443,7 +446,7 @@ typedef enum
                              completion:NULL];
         };
 
-        if (CGRectGetMinX(LEFT_VIEW_FRAME) > _SNStackNavigationCutDownWidth)
+        if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
         {
             [self _cutDownViewControllersExceptRootViewController];
         }
@@ -464,7 +467,7 @@ typedef enum
     {
         CGFloat leftViewX;
 
-        leftViewX = -[self _tabFoldedWidth];
+        leftViewX = 0;
 
         animationBlock = ^(void)
         {
@@ -508,7 +511,7 @@ typedef enum
         CGFloat leftViewX, moreLeftViewX;
 
         leftViewX       = CGRectGetMaxX(MORE_LEFT_VIEW_FRAME);
-        moreLeftViewX   = -[self _tabFoldedWidth];
+        moreLeftViewX   = 0;
 
         animationBlock = ^(void)
         {
@@ -587,8 +590,8 @@ typedef enum
 
         animationBlock = ^(void)
         {
-            LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
-            RIGHT_VIEW_SET_X(-[self _tabFoldedWidth]);
+            LEFT_VIEW_SET_X(0);
+            RIGHT_VIEW_SET_X(0);
             MORE_RIGHT_VIEW_SET_X(moreRightViewX);
         };
 
@@ -643,7 +646,7 @@ typedef enum
 
         animationBlock = ^(void)
         {
-            LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+            LEFT_VIEW_SET_X(0);
             RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
             MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
         };
@@ -654,7 +657,7 @@ typedef enum
 
             bounceBackAnimationBlock = ^(void)
             {
-                LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+                LEFT_VIEW_SET_X(0);
                 RIGHT_VIEW_SET_X(rightViewX);
                 MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
             };
@@ -687,15 +690,15 @@ typedef enum
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
-                if (CGRectGetMinX(LEFT_VIEW_FRAME) > 0)
+                if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX)
                 {
                     animationBlock = ^(void)
                     {
-                        LEFT_VIEW_SET_X(0);
+                        LEFT_VIEW_SET_X(_tabEndX);
                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                     };
                 }
-                else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= -[self _tabFoldedWidth])
+                else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
                 {
                     CGFloat rightViewX;
 
@@ -703,7 +706,7 @@ typedef enum
 
                     animationBlock = ^(void)
                     {
-                        LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+                        LEFT_VIEW_SET_X(0);
                         RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
                     };
 
@@ -724,8 +727,8 @@ typedef enum
                 {
                     animationBlock = ^(void)
                     {
-                        LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
-                        RIGHT_VIEW_SET_X(-[self _tabFoldedWidth] + CGRectGetWidth(LEFT_VIEW_FRAME));
+                        LEFT_VIEW_SET_X(0);
+                        RIGHT_VIEW_SET_X(CGRectGetWidth(LEFT_VIEW_FRAME));
                     };
                 }
             }
@@ -741,15 +744,15 @@ typedef enum
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
-                if (CGRectGetMinX(LEFT_VIEW_FRAME) > 0)
+                if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX)
                 {
                     animationBlock = ^(void)
                     {
-                        LEFT_VIEW_SET_X(0);
+                        LEFT_VIEW_SET_X(_tabEndX);
                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                     };
                 }
-                else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= -[self _tabFoldedWidth])
+                else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
                 {
                     [self _moveToStateMLLRMRWithLeftDirection];
                 }
@@ -757,8 +760,8 @@ typedef enum
                 {
                     animationBlock = ^(void)
                     {
-                        LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
-                        RIGHT_VIEW_SET_X(-[self _tabFoldedWidth] + CGRectGetWidth(LEFT_VIEW_FRAME));
+                        LEFT_VIEW_SET_X(0);
+                        RIGHT_VIEW_SET_X(CGRectGetWidth(LEFT_VIEW_FRAME));
                     };
                 }
             }
@@ -774,7 +777,7 @@ typedef enum
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
-                if (CGRectGetMinX(LEFT_VIEW_FRAME) <= -[self _tabFoldedWidth])
+                if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
                 {
                     CGFloat rightViewX;
                     int     offsetDirection;
@@ -784,21 +787,30 @@ typedef enum
 
                     animationBlock = ^(void)
                     {
-                        LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
-                        RIGHT_VIEW_SET_X(rightViewX + _SNStackNavigationMoveOffset * offsetDirection);
+                        LEFT_VIEW_SET_X(0);
+                        RIGHT_VIEW_SET_X(rightViewX);
                     };
 
                     completionBlock = ^(BOOL finished)
                     {
                         void (^bounceBlock)(void);
+                        void (^bounceCompletionBlock)(BOOL);
 
                         bounceBlock = ^(void)
                         {
+                            LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset * offsetDirection);
+                            RIGHT_VIEW_SET_X(rightViewX + _SNStackNavigationMoveOffset * offsetDirection);
+                        };
+
+                        bounceCompletionBlock = ^(BOOL finished)
+                        {
+                            LEFT_VIEW_SET_X(0);
                             RIGHT_VIEW_SET_X(rightViewX);
                         };
 
                         [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                         animations:bounceBlock];
+                                         animations:bounceBlock
+                                         completion:bounceCompletionBlock];
                     };
                 }
                 else
@@ -809,7 +821,7 @@ typedef enum
 
                     animationBlock = ^(void)
                     {
-                        LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+                        LEFT_VIEW_SET_X(0);
                         RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
                     };
 
@@ -944,19 +956,19 @@ typedef enum
 
                 RIGHT_VIEW_SET_X(startPointOfRightView.x + translationStart.x + (translation.x - translationStart.x) * coefficient);
 
-                if (-[self _tabFoldedWidth] <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
+                if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
                 {
                     LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
                 }
                 else
                 {
-                    LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+                    LEFT_VIEW_SET_X(0);
                 }
             }
         }
         else if (state == _SNStackNavigationStateLRMR)
         {
-            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= -[self _tabFoldedWidth])
+            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= 0)
             {
                 [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
                 [CONTENT_VIEW setLeftView:RIGHT_VIEW];
@@ -977,7 +989,7 @@ typedef enum
             }
             else if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
             {
-                RIGHT_VIEW_SET_X(MAX(startPointOfRightView.x + translation.x, -[self _tabFoldedWidth]));
+                RIGHT_VIEW_SET_X(MAX(startPointOfRightView.x + translation.x, 0));
                 MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
             }
             else if (RIGHT_VIEW_FOLDED_X < CGRectGetMinX(RIGHT_VIEW_FRAME) &&
@@ -1009,13 +1021,13 @@ typedef enum
 
                 RIGHT_VIEW_SET_X(startPointOfRightView.x + translationStart.x + (translation.x - translationStart.x) * coefficient);
 
-                if (-[self _tabFoldedWidth] <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
+                if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
                 {
                     LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
                 }
                 else
                 {
-                    LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+                    LEFT_VIEW_SET_X(0);
                 }
             }
         }
@@ -1051,13 +1063,13 @@ typedef enum
             {
                 RIGHT_VIEW_SET_X(startPointOfRightView.x + (translation.x - translationStart.x));
 
-                if (-[self _tabFoldedWidth] <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
+                if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
                 {
                     LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
                 }
                 else
                 {
-                    LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+                    LEFT_VIEW_SET_X(0);
 
                     startPointOfRightView = RIGHT_VIEW_FRAME.origin;
                     translationStart = translation;
@@ -1066,7 +1078,7 @@ typedef enum
         }
         else if (state == _SNStackNavigationStateMLLRMR)
         {
-            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= -[self _tabFoldedWidth])
+            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= 0)
             {
                 [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
                 [CONTENT_VIEW setLeftView:RIGHT_VIEW];
@@ -1106,7 +1118,7 @@ typedef enum
             }
             else if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
             {
-                RIGHT_VIEW_SET_X(MAX(startPointOfRightView.x + translation.x, -[self _tabFoldedWidth]));
+                RIGHT_VIEW_SET_X(MAX(startPointOfRightView.x + translation.x, 0));
                 MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
             }
             else if (RIGHT_VIEW_FOLDED_X < CGRectGetMinX(RIGHT_VIEW_FRAME) &&
@@ -1129,13 +1141,13 @@ typedef enum
                 {
                     LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
                 }
-                else if (-[self _tabFoldedWidth] <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
+                else if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
                 {
                     LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
                 }
                 else
                 {
-                    LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+                    LEFT_VIEW_SET_X(0);
 
                     startPointOfRightView = RIGHT_VIEW_FRAME.origin;
                     translationStart = translation;
@@ -1149,6 +1161,47 @@ typedef enum
     if ([recognizer state] == UIGestureRecognizerStateEnded)
     {
         [self _moveToState:translation.x > 0 ? _SNStackNavigationDragDirectionRight : _SNStackNavigationDragDirectionLeft];
+    }
+}
+
+
+- (void)_updateCornerRadius
+{
+    NSUInteger viewsCount;
+
+    // the specification of removeFromSuperlayer is that Removes the receiver from the sublayers array or mask property of the receiver’s superlayer.
+    [[CONTENT_VIEW leftMaskLayer] removeFromSuperlayer];
+    [[CONTENT_VIEW rightMaskLayer] removeFromSuperlayer];
+
+    viewsCount = [STACKED_VIEWS_CONCRETE count];
+    if (viewsCount == 1)
+    {
+        [[[[self rootViewController] view] layer] setCornerRadius:SNStackNavigationCornerRadius];
+        [[[[self rootViewController] view] layer] setMasksToBounds:YES];
+    }
+    else if (viewsCount > 1)
+    {
+        CGRect              frame;
+        UIViewController    *mostRightViewController;
+
+        [[[[self rootViewController] view] layer] setCornerRadius:0];
+
+        frame = [[[[self rootViewController] view] layer] bounds];
+        frame.size.width += SNStackNavigationCornerRadius;
+
+        [[CONTENT_VIEW leftMaskLayer] setFrame:frame];
+
+        [[[[self rootViewController] view] layer] setMask:[CONTENT_VIEW leftMaskLayer]];
+
+        mostRightViewController = [[self viewControllers] lastObject];
+
+        frame = [[[mostRightViewController view] layer] bounds];
+        frame.origin.x   = -SNStackNavigationCornerRadius;
+        frame.size.width += SNStackNavigationCornerRadius;
+
+        [[CONTENT_VIEW rightMaskLayer] setFrame:frame];
+
+        [[[mostRightViewController view] layer] setMask:[CONTENT_VIEW rightMaskLayer]];
     }
 }
 
@@ -1227,13 +1280,15 @@ typedef enum
 
     [STACKED_VIEWS addSubview:[viewController view]];
 
+    [self _updateCornerRadius];
+
     subviewsCount = [STACKED_VIEWS_CONCRETE count];
 
     if (subviewsCount == 1)
     {
         animationsBlock = ^(void)
         {
-            LEFT_VIEW_SET_X(tabWidth - minimumTabWidth);
+            LEFT_VIEW_SET_X(_tabEndX);
         };
 
         [CONTENT_VIEW setMoreRightView:nil];
@@ -1256,8 +1311,8 @@ typedef enum
         animationsBlock = ^(void)
         {
             RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
-            LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
-            MORE_LEFT_VIEW_SET_X(-[self _tabFoldedWidth]);
+            LEFT_VIEW_SET_X(0);
+            MORE_LEFT_VIEW_SET_X(0);
         };
 
         if (subviewsCount == 2)
