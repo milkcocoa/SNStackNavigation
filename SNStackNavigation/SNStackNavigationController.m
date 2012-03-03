@@ -416,6 +416,11 @@ typedef enum
 
 - (void)_cutDownViewControllersExceptRootViewController
 {
+    if ([[self delegate] respondsToSelector:@selector(stackNavigationControllerWillCuttingDown:)])
+    {
+        [[self delegate] stackNavigationControllerWillCuttingDown:self];
+    }
+
     [_viewControllers enumerateObjectsWithOptions:NSEnumerationReverse
                                         usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
      {
