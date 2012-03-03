@@ -95,10 +95,6 @@
     [self addSubview:stackedViews];
 
     [stackedViews setAutoresizesSubviews:YES];
-    [stackedViews setClipsToBounds:YES];
-
-    [[stackedViews layer] setCornerRadius:SNStackNavigationCornerRadius];
-    [[stackedViews layer] setMasksToBounds:YES];
 }
 
 

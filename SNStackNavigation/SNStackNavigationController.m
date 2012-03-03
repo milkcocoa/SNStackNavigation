@@ -1260,6 +1260,10 @@ typedef enum
     viewsCount = [STACKED_VIEWS_CONCRETE count];
     if (viewsCount == 1)
     {
+        [STACKED_VIEWS setClipsToBounds:NO];
+        [[STACKED_VIEWS layer] setCornerRadius:0];
+        [[STACKED_VIEWS layer] setMasksToBounds:NO];
+
         [[[[self rootViewController] view] layer] setCornerRadius:SNStackNavigationCornerRadius];
         [[[[self rootViewController] view] layer] setMasksToBounds:YES];
     }
@@ -1267,6 +1271,10 @@ typedef enum
     {
         CGRect              frame;
         UIViewController    *mostRightViewController;
+
+        [STACKED_VIEWS setClipsToBounds:YES];
+        [[STACKED_VIEWS layer] setCornerRadius:SNStackNavigationCornerRadius];
+        [[STACKED_VIEWS layer] setMasksToBounds:YES];
 
         [[[[self rootViewController] view] layer] setCornerRadius:0];
 
