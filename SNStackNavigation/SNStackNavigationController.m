@@ -23,6 +23,8 @@ static CGFloat const _SNStackNavigationAnimationDuration            = 0.2;
 static CGFloat const _SNStackNavigationBounceAnimationDuration      = 0.2;
 static CGFloat const _SNStackNavigationMoveOffset                   = 10;
 
+static NSString * const _SNStackNavigationWillCuttingDownObservingKey   = @"_willCuttingDown";
+
 typedef enum
 {
     _SNStackNavigationDragDirectionNone,
@@ -80,10 +82,12 @@ typedef enum
 
 @property (nonatomic)   CGFloat         _tabEndX;
 @property (nonatomic)   NSMutableArray  *_viewControllers;
+@property (nonatomic)   BOOL            _willCuttingDown;
 
 #pragma mark - Private Methods
 
 - (void)_initializeViewControllers;
+- (void)_initializeWillCuttingDown;
 
 - (void)_initializeContentView;
 - (void)_initializePanGesture;
@@ -120,6 +124,7 @@ typedef enum
 
 @synthesize _tabEndX;
 @synthesize _viewControllers;
+@synthesize _willCuttingDown;
 
 @synthesize delegate;
 @synthesize minimumTabWidth;
@@ -174,6 +179,7 @@ typedef enum
         _tabEndX        = tabWidth - minimumTabWidth;
 
         [self _initializeViewControllers];
+        [self _initializeWillCuttingDown];
     }
 
     return self;
@@ -183,6 +189,53 @@ typedef enum
 - (void)_initializeViewControllers
 {
     [self set_viewControllers:[NSMutableArray array]];
+}
+
+
+- (void)_initializeWillCuttingDown
+{
+    _willCuttingDown = NO;
+
+    [self addObserver:self
+           forKeyPath:_SNStackNavigationWillCuttingDownObservingKey
+              options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+              context:NULL];
+}
+
+
+- (void)dealloc
+{
+    [self removeObserver:self forKeyPath:_SNStackNavigationWillCuttingDownObservingKey];
+}
+
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+    if ([keyPath isEqualToString:_SNStackNavigationWillCuttingDownObservingKey])
+    {
+        if ([[change objectForKey:NSKeyValueChangeNewKey] isEqualToNumber:[change objectForKey:NSKeyValueChangeOldKey]])
+        {
+            return;
+        }
+
+        if (_willCuttingDown)
+        {
+            if ([[self delegate] respondsToSelector:@selector(stackNavigationControllerBeginCuttingDown:)])
+            {
+                [[self delegate] stackNavigationControllerBeginCuttingDown:self];
+            }
+        }
+        else
+        {
+            if ([[self delegate] respondsToSelector:@selector(stackNavigationControllerCancelCuttingDown:)])
+            {
+                [[self delegate] stackNavigationControllerCancelCuttingDown:self];
+            }
+        }
+    }
 }
 
 
@@ -274,9 +327,23 @@ typedef enum
 
 - (void)_unregisterViewController:(UIViewController *)viewController
 {
+    if ([[self delegate] respondsToSelector:@selector(stackNavigationController:willRemoveViewController:)])
+    {
+        [[self delegate] stackNavigationController:self
+                          willRemoveViewController:viewController];
+    }
+
+    [[viewController view] removeFromSuperview];
+
     [_viewControllers removeObject:viewController];
 
     objc_setAssociatedObject(viewController, SNStackNavigationControllerKey, nil, OBJC_ASSOCIATION_ASSIGN);
+
+    if ([[self delegate] respondsToSelector:@selector(stackNavigationController:didRemoveViewController:)])
+    {
+        [[self delegate] stackNavigationController:self
+                           didRemoveViewController:viewController];
+    }
 }
 
 
@@ -361,7 +428,6 @@ typedef enum
              return;
          }
 
-         [[removedViewController view] removeFromSuperview];
          [self _unregisterViewController:removedViewController];
      }];
 
@@ -965,6 +1031,15 @@ typedef enum
                     LEFT_VIEW_SET_X(0);
                 }
             }
+
+            if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
+            {
+                [self set_willCuttingDown:YES];
+            }
+            else
+            {
+                [self set_willCuttingDown:NO];
+            }
         }
         else if (state == _SNStackNavigationStateLRMR)
         {
@@ -1029,6 +1104,15 @@ typedef enum
                 {
                     LEFT_VIEW_SET_X(0);
                 }
+            }
+
+            if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
+            {
+                [self set_willCuttingDown:YES];
+            }
+            else
+            {
+                [self set_willCuttingDown:NO];
             }
         }
         else if (state == _SNStackNavigationStateMLLR)
@@ -1222,6 +1306,8 @@ typedef enum
                        viewWidth,
                        CGRectGetHeight([[self view] bounds]));
 
+    [self set_willCuttingDown:NO];
+
     if (!fromViewController)
     {
         if ([_viewControllers count])
@@ -1236,7 +1322,6 @@ typedef enum
 
              removedViewController = obj;
 
-             [[removedViewController view] removeFromSuperview];
              [self _unregisterViewController:removedViewController];
          }];
     }
@@ -1267,7 +1352,6 @@ typedef enum
 
                  frame.origin.x = CGRectGetMinX([[removedViewController view] frame]);
 
-                 [[removedViewController view] removeFromSuperview];
                  [self _unregisterViewController:removedViewController];
              }
          }];
