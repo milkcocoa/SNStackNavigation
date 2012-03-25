@@ -58,6 +58,11 @@
 - (void)stackNavigationControllerWillCuttingDown:(SNStackNavigationController *)stackNavigationController;
 
 - (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
+             didAddViewController:(UIViewController *)viewController;
+- (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
+            willAddViewController:(UIViewController *)viewController;
+
+- (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
          willRemoveViewController:(UIViewController *)viewController;
 - (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
           didRemoveViewController:(UIViewController *)viewController;

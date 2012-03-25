@@ -8,6 +8,7 @@
 #import "SNHomeViewController.h"
 
 #import <objc/message.h>
+#import <QuartzCore/QuartzCore.h>
 
 #import "SNStackNavigationController.h"
 #import "SNStackedViewController.h"
@@ -43,6 +44,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 @interface SNHomeViewController ()
 <
+    SNStackNavigationControllerDelegate,
     UITableViewDataSource,
     UITableViewDelegate
 >
@@ -54,6 +56,8 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
 #pragma mark - Tab Items
 
+@property (nonatomic)   UIView                      *_cutDownCard1;
+@property (nonatomic)   UIView                      *_cutDownCard2;
 @property (nonatomic)   SNStackedViewController     *_stackedViewController1;
 @property (nonatomic)   SNStackedViewController     *_stackedViewController2;
 
@@ -75,6 +79,8 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 #pragma mark - Properties
 
 
+@synthesize _cutDownCard1;
+@synthesize _cutDownCard2;
 @synthesize _navigationController;
 @synthesize _stackedViewController1;
 @synthesize _stackedViewController2;
@@ -115,6 +121,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 {
     [self _initializeContentView];
     [self _initializeTabTableView];
+    [self _initializeCutdownCardViews];
     [self _initializeStackNavigationController];
 
     [self showTab1ViewController];
@@ -148,10 +155,49 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 }
 
 
+- (void)_initializeCutdownCardViews
+{
+    static CGFloat const cardHeight = 80;
+
+    CGFloat y;
+
+    y = (cardHeight + CGRectGetHeight([[self view] bounds])) / 2 - 5;
+
+    _cutDownCard1 = [[UIView alloc] initWithFrame:CGRectMake(312, y, 50, cardHeight)];
+    _cutDownCard2 = [[UIView alloc] initWithFrame:CGRectMake(332, y + 10, 50, cardHeight)];
+
+    [[self view] addSubview:_cutDownCard1];
+    [[self view] addSubview:_cutDownCard2];
+
+    [_cutDownCard1 setAlpha:0.8];
+    [_cutDownCard2 setAlpha:0.8];
+
+    [_cutDownCard1 setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin];
+    [_cutDownCard2 setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin];
+
+    [_cutDownCard1 setHidden:YES];
+    [_cutDownCard2 setHidden:YES];
+
+    [[_cutDownCard1 layer] setBorderColor:[[UIColor darkGrayColor] CGColor]];
+    [[_cutDownCard2 layer] setBorderColor:[[UIColor darkGrayColor] CGColor]];
+
+    [[_cutDownCard1 layer] setBorderWidth:2];
+    [[_cutDownCard2 layer] setBorderWidth:2];
+
+    [[_cutDownCard1 layer] setCornerRadius:4];
+    [[_cutDownCard2 layer] setCornerRadius:4];
+
+    [[_cutDownCard1 layer] setMasksToBounds:YES];
+    [[_cutDownCard2 layer] setMasksToBounds:YES];
+}
+
+
 - (void)_initializeStackNavigationController
 {
     _navigationController = [[SNStackNavigationController alloc] initWithNibName:nil bundle:nil];
     [[self view] addSubview:[_navigationController view]];
+
+    [_navigationController setDelegate:self];
 
     [[_navigationController view] setAutoresizingMask:(UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight)];
     [[_navigationController view] setFrame:[[self view] bounds]];
@@ -173,6 +219,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
     // e.g. self.myOutlet = nil;
 }
 
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
@@ -191,7 +238,6 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
     else
     {
         _stackedViewController1 = [[SNStackedViewController alloc] initWithNibName:nil bundle:nil];
-        [_stackedViewController1 setText:@"RootView Menu 1"];
         animated = NO;
     }
 
@@ -211,6 +257,92 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
     [_navigationController pushViewController:_stackedViewController2
                            fromViewController:nil
                                      animated:YES];
+}
+
+
+#pragma mark - SNStackNavigationDelegate
+
+
+- (void)stackNavigationControllerBeginCuttingDown:(SNStackNavigationController *)stackNavigationController
+{
+    CGRect frame;
+    void (^animationsBlock)(void);
+
+    frame = [_cutDownCard2 frame];
+    frame.origin.x = 80;
+
+    animationsBlock = ^(void)
+    {
+        CGAffineTransform transform;
+
+        transform = CGAffineTransformRotate(CGAffineTransformMakeTranslation(45, 5), 15 / (CGFloat)180 * M_PI);
+
+        [_cutDownCard2 setAlpha:0.5];
+        [_cutDownCard2 setTransform:transform];
+    };
+
+    [UIView animateWithDuration:0.1
+                     animations:animationsBlock];
+}
+
+
+- (void)stackNavigationControllerCancelCuttingDown:(SNStackNavigationController *)stackNavigationController
+{
+    CGRect frame;
+    void (^animationsBlock)(void);
+
+    frame = [_cutDownCard2 frame];
+    frame.origin.x = 40;
+
+    animationsBlock = ^(void)
+    {
+        [_cutDownCard2 setAlpha:0.8];
+        [_cutDownCard2 setTransform:CGAffineTransformIdentity];
+    };
+
+    [UIView animateWithDuration:0.1
+                     animations:animationsBlock];
+}
+
+
+- (void)stackNavigationControllerWillCuttingDown:(SNStackNavigationController *)stackNavigationController
+{
+    void (^animationsBlock)(void);
+
+    animationsBlock = ^(void)
+    {
+        CGAffineTransform transform;
+
+        transform = CGAffineTransformRotate(CGAffineTransformMakeTranslation(45, 65), 15 / (CGFloat)180 * M_PI);
+
+        [_cutDownCard2 setTransform:transform];
+    };
+
+    [UIView animateWithDuration:0.2
+                     animations:animationsBlock];
+}
+
+
+- (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
+             didAddViewController:(UIViewController *)viewController
+{
+    BOOL cutDownCardIsHidden;
+
+    cutDownCardIsHidden = [[stackNavigationController viewControllers] count] <= 1;
+
+    [_cutDownCard1 setHidden:cutDownCardIsHidden];
+    [_cutDownCard2 setHidden:cutDownCardIsHidden];
+}
+
+
+- (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
+          didRemoveViewController:(UIViewController *)viewController
+{
+    SNStackedViewController *lastViewController;
+
+    lastViewController = [[stackNavigationController viewControllers] lastObject];
+    [[lastViewController itemsTableView] deselectRowAtIndexPath:[[lastViewController itemsTableView] indexPathForSelectedRow]
+                                                       animated:YES];
 }
 
 

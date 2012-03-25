@@ -223,16 +223,16 @@ typedef enum
 
         if (_willCuttingDown)
         {
-            if ([[self delegate] respondsToSelector:@selector(stackNavigationControllerBeginCuttingDown:)])
+            if ([delegate respondsToSelector:@selector(stackNavigationControllerBeginCuttingDown:)])
             {
-                [[self delegate] stackNavigationControllerBeginCuttingDown:self];
+                [delegate stackNavigationControllerBeginCuttingDown:self];
             }
         }
         else
         {
-            if ([[self delegate] respondsToSelector:@selector(stackNavigationControllerCancelCuttingDown:)])
+            if ([delegate respondsToSelector:@selector(stackNavigationControllerCancelCuttingDown:)])
             {
-                [[self delegate] stackNavigationControllerCancelCuttingDown:self];
+                [delegate stackNavigationControllerCancelCuttingDown:self];
             }
         }
     }
@@ -319,18 +319,30 @@ typedef enum
 
 - (void)_registerViewController:(UIViewController *)viewController
 {
+    if ([delegate respondsToSelector:@selector(stackNavigationController:willAddViewController:)])
+    {
+        [delegate stackNavigationController:self
+                      willAddViewController:viewController];
+    }
+
     [_viewControllers addObject:viewController];
 
     objc_setAssociatedObject(viewController, SNStackNavigationControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
+
+    if ([delegate respondsToSelector:@selector(stackNavigationController:didAddViewController:)])
+    {
+        [delegate stackNavigationController:self
+                       didAddViewController:viewController];
+    }
 }
 
 
 - (void)_unregisterViewController:(UIViewController *)viewController
 {
-    if ([[self delegate] respondsToSelector:@selector(stackNavigationController:willRemoveViewController:)])
+    if ([delegate respondsToSelector:@selector(stackNavigationController:willRemoveViewController:)])
     {
-        [[self delegate] stackNavigationController:self
-                          willRemoveViewController:viewController];
+        [delegate stackNavigationController:self
+                   willRemoveViewController:viewController];
     }
 
     [[viewController view] removeFromSuperview];
@@ -339,10 +351,10 @@ typedef enum
 
     objc_setAssociatedObject(viewController, SNStackNavigationControllerKey, nil, OBJC_ASSOCIATION_ASSIGN);
 
-    if ([[self delegate] respondsToSelector:@selector(stackNavigationController:didRemoveViewController:)])
+    if ([delegate respondsToSelector:@selector(stackNavigationController:didRemoveViewController:)])
     {
-        [[self delegate] stackNavigationController:self
-                           didRemoveViewController:viewController];
+        [delegate stackNavigationController:self
+                    didRemoveViewController:viewController];
     }
 }
 
@@ -416,9 +428,9 @@ typedef enum
 
 - (void)_cutDownViewControllersExceptRootViewController
 {
-    if ([[self delegate] respondsToSelector:@selector(stackNavigationControllerWillCuttingDown:)])
+    if ([delegate respondsToSelector:@selector(stackNavigationControllerWillCuttingDown:)])
     {
-        [[self delegate] stackNavigationControllerWillCuttingDown:self];
+        [delegate stackNavigationControllerWillCuttingDown:self];
     }
 
     [_viewControllers enumerateObjectsWithOptions:NSEnumerationReverse

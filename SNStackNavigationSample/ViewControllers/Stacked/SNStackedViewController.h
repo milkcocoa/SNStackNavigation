@@ -15,6 +15,6 @@
 
 #pragma mark - Public Properties
 
-@property (strong, nonatomic)   NSString    *text;
+@property (nonatomic, readonly) UITableView *itemsTableView;
 
 @end

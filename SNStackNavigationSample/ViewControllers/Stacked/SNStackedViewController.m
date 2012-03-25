@@ -24,7 +24,7 @@ static CGFloat  _SNStackedViewControllerViewWidth   = 476;
 
 #pragma mark - Private Properties
 
-@property (strong, nonatomic)   UILabel *_label;
+@property (nonatomic, readwrite)    UITableView *itemsTableView;
 
 #pragma mark - Private Methods
 
@@ -43,19 +43,7 @@ static CGFloat  _SNStackedViewControllerViewWidth   = 476;
 #pragma mark - Properties
 
 
-@synthesize _label;
-
-@synthesize text;
-
-
-- (void)setText:(NSString *)aText
-{
-    if (text != aText)
-    {
-        text = aText;
-        [_label setText:text];
-    }
-}
+@synthesize itemsTableView;
 
 
 #pragma mark -
@@ -111,31 +99,14 @@ static CGFloat  _SNStackedViewControllerViewWidth   = 476;
 
 - (void)_initializeTableView
 {
-    UITableView *tableView;
+    itemsTableView = [[UITableView alloc] initWithFrame:[[self view] bounds]
+                                                  style:UITableViewStylePlain];
+    [[self view] addSubview:itemsTableView];
 
-    tableView = [[UITableView alloc] initWithFrame:[[self view] bounds]
-                                             style:UITableViewStylePlain];
-    [[self view] addSubview:tableView];
-
-    [tableView setAutoresizesSubviews:YES];
-    [tableView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight)];
-    [tableView setDataSource:self];
-    [tableView setDelegate:self];
-}
-
-
-- (void)_initializeLabel
-{
-    UILabel *label;
-
-    label = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 100, 16)];
-    [[self view] addSubview:label];
-
-    [label setAutoresizingMask:(UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin |
-                                UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin)];
-    [label setBackgroundColor:[UIColor clearColor]];
-    [label setCenter:[[self view] center]];
-    [label setText:text];
+    [itemsTableView setAutoresizesSubviews:YES];
+    [itemsTableView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight)];
+    [itemsTableView setDataSource:self];
+    [itemsTableView setDelegate:self];
 }
 
 
@@ -209,7 +180,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     navigationController = [self stackNavigationController];
 
     viewController = [[SNStackedViewController alloc] initWithNibName:nil bundle:nil];
-    [viewController setText:[NSString stringWithFormat:@"Stack %d", [[navigationController viewControllers] count] + 1]];
 
     [navigationController pushViewController:viewController
                           fromViewController:self
