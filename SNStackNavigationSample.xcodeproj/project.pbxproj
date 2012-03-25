@@ -34,8 +34,8 @@
 		A200FC6B148B09CB0055A48F /* SNStackNavigationSample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SNStackNavigationSample-Prefix.pch"; sourceTree = "<group>"; };
 		A200FC6C148B09CB0055A48F /* SNAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SNAppDelegate.h; sourceTree = "<group>"; };
 		A200FC6D148B09CB0055A48F /* SNAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SNAppDelegate.m; sourceTree = "<group>"; };
-		A200FC6F148B09CB0055A48F /* SNRootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SNRootViewController.h; path = ../../SNRootViewController.h; sourceTree = "<group>"; };
-		A200FC70148B09CB0055A48F /* SNRootViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SNRootViewController.m; path = ../../SNRootViewController.m; sourceTree = "<group>"; };
+		A200FC6F148B09CB0055A48F /* SNRootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SNRootViewController.h; sourceTree = "<group>"; };
+		A200FC70148B09CB0055A48F /* SNRootViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SNRootViewController.m; sourceTree = "<group>"; };
 		A200FC95148B0CFC0055A48F /* SNHomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNHomeViewController.h; sourceTree = "<group>"; };
 		A200FC96148B0CFC0055A48F /* SNHomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNHomeViewController.m; sourceTree = "<group>"; };
 		A250E95A14AAFCC500A3B3B0 /* SNStackNavigationContentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackNavigationContentView.h; sourceTree = "<group>"; };
