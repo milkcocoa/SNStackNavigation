@@ -102,12 +102,14 @@
 {
     leftMaskLayer = [CALayer layer];
 
-    [leftMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
+    [leftMaskLayer setAnchorPoint:CGPointZero];
     [leftMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
+    [leftMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
 
     rightMaskLayer = [CALayer layer];
-    [rightMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
+    [rightMaskLayer setAnchorPoint:CGPointZero];
     [rightMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
+    [rightMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
 }
 
 
@@ -116,11 +118,26 @@
     CGFloat height;
 
     height = CGRectGetHeight([self bounds]);
+    if (height < CGRectGetHeight([stackedViews frame]))
+    {
+        // workaround: not to show background, when the rotation (portrait to landscape) occurs
+        [CATransaction begin];
+        [CATransaction setAnimationDuration:.8];
+        [leftMaskLayer setPosition:CGPointMake(0, 0)];
+        [leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([leftMaskLayer frame]), height)];
+        [rightMaskLayer setPosition:CGPointMake(-SNStackNavigationCornerRadius, 0)];
+        [rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([rightMaskLayer frame]), height)];
+        [CATransaction commit];
+    }
+    else
+    {
+        [leftMaskLayer setPosition:CGPointMake(0, 0)];
+        [leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([leftMaskLayer frame]), height)];
+        [rightMaskLayer setPosition:CGPointMake(-SNStackNavigationCornerRadius, 0)];
+        [rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([rightMaskLayer frame]), height)];
+    }
 
     [stackedViews setFrame:CGRectMake(minimumTabWidth, 0, CGRectGetWidth([self bounds]) - minimumTabWidth, height)];
-
-    [leftMaskLayer setFrame:CGRectMake(0, 0, CGRectGetWidth([leftMaskLayer frame]), height)];
-    [rightMaskLayer setFrame:CGRectMake(-SNStackNavigationCornerRadius, 0, CGRectGetWidth([rightMaskLayer frame]), height)];
 }
 
 
