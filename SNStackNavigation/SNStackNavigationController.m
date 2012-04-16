@@ -126,29 +126,29 @@ typedef enum
 @synthesize _viewControllers;
 @synthesize _willCuttingDown;
 
-@synthesize delegate;
-@synthesize minimumTabWidth;
-@synthesize tabWidth;
+@synthesize delegate = _delegate;
+@synthesize minimumTabWidth = _minimumTabWidth;
+@synthesize tabWidth = _tabWidth;
 
 
-- (void)setMinimumTabWidth:(CGFloat)aMinimumTabWidth
+- (void)setMinimumTabWidth:(CGFloat)minimumTabWidth
 {
-    if (minimumTabWidth != aMinimumTabWidth)
+    if (_minimumTabWidth != minimumTabWidth)
     {
-        minimumTabWidth = aMinimumTabWidth;
+        _minimumTabWidth = minimumTabWidth;
 
-        _tabEndX = tabWidth - minimumTabWidth;
+        _tabEndX = _tabWidth - _minimumTabWidth;
     }
 }
 
 
-- (void)setTabWidth:(CGFloat)aTabWidth
+- (void)setTabWidth:(CGFloat)tabWidth
 {
-    if (tabWidth != aTabWidth)
+    if (_tabWidth != tabWidth)
     {
-        tabWidth = aTabWidth;
+        _tabWidth = tabWidth;
 
-        _tabEndX = tabWidth - minimumTabWidth;
+        _tabEndX = _tabWidth - _minimumTabWidth;
     }
 }
 
@@ -174,9 +174,9 @@ typedef enum
     self = [super initWithNibName:nil bundle:nil];
     if (self)
     {
-        tabWidth        = _SNStackNavigationDefaultToolbarWidth;
-        minimumTabWidth = _SNStackNavigationDefaultToolbarMinimumWidth;
-        _tabEndX        = tabWidth - minimumTabWidth;
+        _tabWidth           = _SNStackNavigationDefaultToolbarWidth;
+        _minimumTabWidth    = _SNStackNavigationDefaultToolbarMinimumWidth;
+        _tabEndX            = _tabWidth - _minimumTabWidth;
 
         [self _initializeViewControllers];
         [self _initializeWillCuttingDown];
@@ -223,16 +223,16 @@ typedef enum
 
         if (_willCuttingDown)
         {
-            if ([delegate respondsToSelector:@selector(stackNavigationControllerBeginCuttingDown:)])
+            if ([_delegate respondsToSelector:@selector(stackNavigationControllerBeginCuttingDown:)])
             {
-                [delegate stackNavigationControllerBeginCuttingDown:self];
+                [_delegate stackNavigationControllerBeginCuttingDown:self];
             }
         }
         else
         {
-            if ([delegate respondsToSelector:@selector(stackNavigationControllerCancelCuttingDown:)])
+            if ([_delegate respondsToSelector:@selector(stackNavigationControllerCancelCuttingDown:)])
             {
-                [delegate stackNavigationControllerCancelCuttingDown:self];
+                [_delegate stackNavigationControllerCancelCuttingDown:self];
             }
         }
     }
@@ -267,8 +267,9 @@ typedef enum
     [self setView:contentView];
 
     [contentView setAutoresizesSubviews:YES];
-    [contentView setMinimumTabWidth:minimumTabWidth];
-    [contentView setTabWidth:tabWidth];
+    [contentView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight)];
+    [contentView setMinimumTabWidth:_minimumTabWidth];
+    [contentView setTabWidth:_tabWidth];
 }
 
 
@@ -313,36 +314,36 @@ typedef enum
 
 - (CGFloat)_tabFoldedWidth
 {
-    return tabWidth - minimumTabWidth;
+    return _tabWidth - _minimumTabWidth;
 }
 
 
 - (void)_registerViewController:(UIViewController *)viewController
 {
-    if ([delegate respondsToSelector:@selector(stackNavigationController:willAddViewController:)])
+    if ([_delegate respondsToSelector:@selector(stackNavigationController:willAddViewController:)])
     {
-        [delegate stackNavigationController:self
-                      willAddViewController:viewController];
+        [_delegate stackNavigationController:self
+                       willAddViewController:viewController];
     }
 
     [_viewControllers addObject:viewController];
 
     objc_setAssociatedObject(viewController, SNStackNavigationControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
 
-    if ([delegate respondsToSelector:@selector(stackNavigationController:didAddViewController:)])
+    if ([_delegate respondsToSelector:@selector(stackNavigationController:didAddViewController:)])
     {
-        [delegate stackNavigationController:self
-                       didAddViewController:viewController];
+        [_delegate stackNavigationController:self
+                        didAddViewController:viewController];
     }
 }
 
 
 - (void)_unregisterViewController:(UIViewController *)viewController
 {
-    if ([delegate respondsToSelector:@selector(stackNavigationController:willRemoveViewController:)])
+    if ([_delegate respondsToSelector:@selector(stackNavigationController:willRemoveViewController:)])
     {
-        [delegate stackNavigationController:self
-                   willRemoveViewController:viewController];
+        [_delegate stackNavigationController:self
+                    willRemoveViewController:viewController];
     }
 
     [[viewController view] removeFromSuperview];
@@ -351,10 +352,10 @@ typedef enum
 
     objc_setAssociatedObject(viewController, SNStackNavigationControllerKey, nil, OBJC_ASSOCIATION_ASSIGN);
 
-    if ([delegate respondsToSelector:@selector(stackNavigationController:didRemoveViewController:)])
+    if ([_delegate respondsToSelector:@selector(stackNavigationController:didRemoveViewController:)])
     {
-        [delegate stackNavigationController:self
-                    didRemoveViewController:viewController];
+        [_delegate stackNavigationController:self
+                     didRemoveViewController:viewController];
     }
 }
 
@@ -428,9 +429,9 @@ typedef enum
 
 - (void)_cutDownViewControllersExceptRootViewController
 {
-    if ([delegate respondsToSelector:@selector(stackNavigationControllerWillCuttingDown:)])
+    if ([_delegate respondsToSelector:@selector(stackNavigationControllerWillCuttingDown:)])
     {
-        [delegate stackNavigationControllerWillCuttingDown:self];
+        [_delegate stackNavigationControllerWillCuttingDown:self];
     }
 
     [_viewControllers enumerateObjectsWithOptions:NSEnumerationReverse
