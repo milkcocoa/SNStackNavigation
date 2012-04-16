@@ -67,6 +67,8 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 - (void)_initializeStackNavigationController;
 - (void)_initializeTabTableView;
 
+- (void)_updateCutDownCards;
+
 @end
 
 
@@ -161,7 +163,7 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 
     CGFloat y;
 
-    y = (cardHeight + CGRectGetHeight([[self view] bounds])) / 2 - 5;
+    y = (cardHeight + CGRectGetHeight([[self view] bounds])) / 2 + 30;
 
     _cutDownCard1 = [[UIView alloc] initWithFrame:CGRectMake(312, y, 50, cardHeight)];
     _cutDownCard2 = [[UIView alloc] initWithFrame:CGRectMake(332, y + 10, 50, cardHeight)];
@@ -323,15 +325,21 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 }
 
 
-- (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
-             didAddViewController:(UIViewController *)viewController
+- (void)_updateCutDownCards
 {
     BOOL cutDownCardIsHidden;
 
-    cutDownCardIsHidden = [[stackNavigationController viewControllers] count] <= 1;
+    cutDownCardIsHidden = [[_navigationController viewControllers] count] <= 1;
 
     [_cutDownCard1 setHidden:cutDownCardIsHidden];
     [_cutDownCard2 setHidden:cutDownCardIsHidden];
+}
+
+
+- (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
+             didAddViewController:(UIViewController *)viewController
+{
+    [self _updateCutDownCards];
 }
 
 
@@ -341,8 +349,13 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
     SNStackedViewController *lastViewController;
 
     lastViewController = [[stackNavigationController viewControllers] lastObject];
-    [[lastViewController itemsTableView] deselectRowAtIndexPath:[[lastViewController itemsTableView] indexPathForSelectedRow]
-                                                       animated:YES];
+
+    if (lastViewController == [stackNavigationController rootViewController])
+    {
+        [self performSelector:@selector(_updateCutDownCards)
+                   withObject:nil
+                   afterDelay:.5];
+    }
 }
 
 
