@@ -155,7 +155,12 @@ typedef enum
 
 - (UIViewController *)rootViewController
 {
-    return [_viewControllers objectAtIndex:0];
+    if ([_viewControllers count])
+    {
+        return [_viewControllers objectAtIndex:0];
+    }
+
+    return nil;
 }
 
 
