@@ -10,4 +10,4 @@
 
 char const * const SNStackNavigationControllerKey = "SNStackNavigationControllerKey";
 
-CGFloat const SNStackNavigationCornerRadius = 10;
+CGFloat const SNStackNavigationCornerRadius = 5;
