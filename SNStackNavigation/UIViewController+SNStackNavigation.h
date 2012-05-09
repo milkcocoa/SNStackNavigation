@@ -8,6 +8,13 @@
 #import <UIKit/UIKit.h>
 
 
+typedef enum
+{
+    SNStackNavigationInsertPositionDefault,
+    SNStackNavigationInsertPositionUnFolded,
+} SNStackNavigationInsertPositionType;
+
+
 @class SNStackNavigationController;
 
 
@@ -15,5 +22,6 @@
 
 - (SNStackNavigationController *)stackNavigationController;
 - (CGFloat)contentWidthForViewInStackNavigation;
+- (SNStackNavigationInsertPositionType)insertedPosition;
 
 @end

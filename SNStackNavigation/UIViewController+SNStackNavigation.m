@@ -27,4 +27,10 @@
 }
 
 
+- (SNStackNavigationInsertPositionType)insertedPosition
+{
+    return SNStackNavigationInsertPositionDefault;
+}
+
+
 @end

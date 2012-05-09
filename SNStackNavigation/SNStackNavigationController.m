@@ -294,12 +294,12 @@ typedef enum
 
 
 /*
-// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-}
-*/
+ // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+ - (void)viewDidLoad
+ {
+ [super viewDidLoad];
+ }
+ */
 
 
 - (void)viewDidUnload
@@ -314,6 +314,70 @@ typedef enum
 {
     // Return YES for supported orientations
 	return YES;
+}
+
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                         duration:(NSTimeInterval)duration
+{
+    for (UIViewController *viewController in _viewControllers)
+    {
+        if ([viewController view] == LEFT_VIEW)
+        {
+            CGFloat             viewWidth;
+            CGRect              frame;
+
+            viewWidth = [viewController contentWidthForViewInStackNavigation];
+
+            frame = CGRectMake(0,
+                               0,
+                               viewWidth,
+                               CGRectGetHeight([[self view] bounds]));
+
+            if (RIGHT_VIEW)
+            {
+                frame.origin.x = CGRectGetMinX([LEFT_VIEW frame]);
+            }
+            else
+            {
+                switch ([viewController insertedPosition])
+                {
+                    case SNStackNavigationInsertPositionDefault:
+                    {
+                        frame.origin.x = _tabEndX;
+                        break;
+                    }
+
+                    case SNStackNavigationInsertPositionUnFolded:
+                    {
+                        frame.origin.x = CGRectGetWidth([STACKED_VIEWS frame]) - viewWidth;
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+
+            [LEFT_VIEW setFrame:frame];
+        }
+    }
+
+
+    for (UIViewController *viewController in _viewControllers)
+    {
+        [viewController willRotateToInterfaceOrientation:toInterfaceOrientation
+                                                duration:duration];
+    }
+}
+
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    for (UIViewController *viewController in _viewControllers)
+    {
+        [viewController didRotateFromInterfaceOrientation:fromInterfaceOrientation];
+    }
 }
 
 
@@ -440,7 +504,7 @@ typedef enum
     }
 
     [_viewControllers enumerateObjectsWithOptions:NSEnumerationReverse
-                                        usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
+                                       usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
      {
          UIViewController   *removedViewController;
 
@@ -1325,18 +1389,6 @@ typedef enum
         fromViewController:(UIViewController *)fromViewController
                   animated:(BOOL)animated
 {
-    [self pushViewController:viewController
-          fromViewController:fromViewController
-              insertPosition:SNStackNavigationInsertPositionDefault
-                    animated:animated];
-}
-
-
-- (void)pushViewController:(UIViewController *)viewController
-        fromViewController:(UIViewController *)fromViewController
-            insertPosition:(SNStackNavigationInsertPositionType)insertPosition
-                  animated:(BOOL)animated
-{
     CGFloat         viewWidth;
     __block CGRect  frame;
     NSUInteger      subviewsCount;
@@ -1359,7 +1411,7 @@ typedef enum
         }
 
         [_viewControllers enumerateObjectsWithOptions:NSEnumerationReverse
-                                            usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
+                                           usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
          {
              UIViewController *removedViewController;
 
@@ -1381,7 +1433,7 @@ typedef enum
         ++removedIndexFrom;
 
         [_viewControllers enumerateObjectsWithOptions:NSEnumerationReverse
-                                            usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
+                                           usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
          {
              if (idx < removedIndexFrom)
              {
@@ -1415,7 +1467,7 @@ typedef enum
     {
         animationsBlock = ^(void)
         {
-            switch (insertPosition)
+            switch ([viewController insertedPosition])
             {
                 case SNStackNavigationInsertPositionDefault:
                 {
