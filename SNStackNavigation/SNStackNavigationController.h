@@ -11,6 +11,13 @@
 @protocol SNStackNavigationControllerDelegate;
 
 
+typedef enum
+{
+    SNStackNavigationInsertPositionDefault,
+    SNStackNavigationInsertPositionUnFolded,
+} SNStackNavigationInsertPositionType;
+
+
 #pragma mark - SNStackNavigationController Interface
 
 
@@ -40,6 +47,10 @@
         fromViewController:(UIViewController *)fromViewController
                   animated:(BOOL)animated;
 
+- (void)pushViewController:(UIViewController *)viewController
+        fromViewController:(UIViewController *)fromViewController
+            insertPosition:(SNStackNavigationInsertPositionType)insertPosition
+                  animated:(BOOL)animated;
 @end
 
 

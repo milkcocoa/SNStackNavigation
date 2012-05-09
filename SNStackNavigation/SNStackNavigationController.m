@@ -1325,6 +1325,18 @@ typedef enum
         fromViewController:(UIViewController *)fromViewController
                   animated:(BOOL)animated
 {
+    [self pushViewController:viewController
+          fromViewController:fromViewController
+              insertPosition:SNStackNavigationInsertPositionDefault
+                    animated:animated];
+}
+
+
+- (void)pushViewController:(UIViewController *)viewController
+        fromViewController:(UIViewController *)fromViewController
+            insertPosition:(SNStackNavigationInsertPositionType)insertPosition
+                  animated:(BOOL)animated
+{
     CGFloat         viewWidth;
     __block CGRect  frame;
     NSUInteger      subviewsCount;
@@ -1403,7 +1415,23 @@ typedef enum
     {
         animationsBlock = ^(void)
         {
-            LEFT_VIEW_SET_X(_tabEndX);
+            switch (insertPosition)
+            {
+                case SNStackNavigationInsertPositionDefault:
+                {
+                    LEFT_VIEW_SET_X(_tabEndX);
+                    break;
+                }
+
+                case SNStackNavigationInsertPositionUnFolded:
+                {
+                    LEFT_VIEW_SET_X(CGRectGetWidth([STACKED_VIEWS bounds]) - CGRectGetWidth(LEFT_VIEW_FRAME));
+                    break;
+                }
+
+                default:
+                    break;
+            }
         };
 
         [CONTENT_VIEW setMoreRightView:nil];
