@@ -15,6 +15,7 @@
 		A200FC6E148B09CB0055A48F /* SNAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A200FC6D148B09CB0055A48F /* SNAppDelegate.m */; };
 		A200FC71148B09CB0055A48F /* SNRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A200FC70148B09CB0055A48F /* SNRootViewController.m */; };
 		A200FC97148B0CFC0055A48F /* SNHomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A200FC96148B0CFC0055A48F /* SNHomeViewController.m */; };
+		A249BDBA155B9C740050EC8A /* SNShadowView.m in Sources */ = {isa = PBXBuildFile; fileRef = A249BDB9155B9C740050EC8A /* SNShadowView.m */; };
 		A250E95C14AAFCC600A3B3B0 /* SNStackNavigationContentView.m in Sources */ = {isa = PBXBuildFile; fileRef = A250E95B14AAFCC500A3B3B0 /* SNStackNavigationContentView.m */; };
 		A2BA9850148B167500980A67 /* SNStackNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA984F148B167500980A67 /* SNStackNavigationController.m */; };
 		A2BA9854148B179A00980A67 /* UIViewController+SNStackNavigation.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA9853148B179A00980A67 /* UIViewController+SNStackNavigation.m */; };
@@ -38,6 +39,8 @@
 		A200FC70148B09CB0055A48F /* SNRootViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SNRootViewController.m; sourceTree = "<group>"; };
 		A200FC95148B0CFC0055A48F /* SNHomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNHomeViewController.h; sourceTree = "<group>"; };
 		A200FC96148B0CFC0055A48F /* SNHomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNHomeViewController.m; sourceTree = "<group>"; };
+		A249BDB8155B9C740050EC8A /* SNShadowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNShadowView.h; sourceTree = "<group>"; };
+		A249BDB9155B9C740050EC8A /* SNShadowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNShadowView.m; sourceTree = "<group>"; };
 		A250E95A14AAFCC500A3B3B0 /* SNStackNavigationContentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackNavigationContentView.h; sourceTree = "<group>"; };
 		A250E95B14AAFCC500A3B3B0 /* SNStackNavigationContentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SNStackNavigationContentView.m; sourceTree = "<group>"; };
 		A2BA984E148B167500980A67 /* SNStackNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SNStackNavigationController.h; sourceTree = "<group>"; };
@@ -156,6 +159,8 @@
 				A250E95B14AAFCC500A3B3B0 /* SNStackNavigationContentView.m */,
 				A2BA9852148B179A00980A67 /* UIViewController+SNStackNavigation.h */,
 				A2BA9853148B179A00980A67 /* UIViewController+SNStackNavigation.m */,
+				A249BDB8155B9C740050EC8A /* SNShadowView.h */,
+				A249BDB9155B9C740050EC8A /* SNShadowView.m */,
 			);
 			path = SNStackNavigation;
 			sourceTree = "<group>";
@@ -239,6 +244,7 @@
 				A2BA9858148B180500980A67 /* SNStackNavigationControllerConstants.m in Sources */,
 				A2BA985D148B260600980A67 /* SNStackedViewController.m in Sources */,
 				A250E95C14AAFCC600A3B3B0 /* SNStackNavigationContentView.m in Sources */,
+				A249BDBA155B9C740050EC8A /* SNShadowView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

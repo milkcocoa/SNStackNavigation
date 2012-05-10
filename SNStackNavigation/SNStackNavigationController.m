@@ -12,6 +12,7 @@
 
 #import "SNStackNavigationControllerConstants.h"
 
+#import "SNShadowView.h"
 #import "SNStackNavigationContentView.h"
 
 
@@ -1375,8 +1376,8 @@ typedef enum
         mostRightViewController = [[self viewControllers] lastObject];
 
         frame = [[[mostRightViewController view] layer] bounds];
-        frame.origin.x   = -SNStackNavigationCornerRadius;
-        frame.size.width += SNStackNavigationCornerRadius;
+        frame.origin.x   = -(SNStackNavigationCornerRadius + 40);
+        frame.size.width += SNStackNavigationCornerRadius + 40;
 
         [[CONTENT_VIEW rightMaskLayer] setFrame:frame];
 
@@ -1503,6 +1504,13 @@ typedef enum
     }
     else
     {
+        SNShadowView *shadowView;
+
+        shadowView = [[SNShadowView alloc] initWithFrame:CGRectMake(-40, 0, 40, CGRectGetHeight([[self view] bounds]))];
+
+        [shadowView setAutoresizingMask:UIViewAutoresizingFlexibleHeight];
+        [[viewController view] addSubview:shadowView];
+
         animationsBlock = ^(void)
         {
             RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
