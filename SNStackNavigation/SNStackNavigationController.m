@@ -23,6 +23,7 @@ static CGFloat const _SNStackNavigationMoveFrictionCoEfficient      = 0.5;
 static CGFloat const _SNStackNavigationAnimationDuration            = 0.2;
 static CGFloat const _SNStackNavigationBounceAnimationDuration      = 0.2;
 static CGFloat const _SNStackNavigationMoveOffset                   = 10;
+static CGFloat const _SNStackNavigationShadowWidth                  = 40;
 
 static NSString * const _SNStackNavigationWillCuttingDownObservingKey   = @"_willCuttingDown";
 
@@ -1376,8 +1377,8 @@ typedef enum
         mostRightViewController = [[self viewControllers] lastObject];
 
         frame = [[[mostRightViewController view] layer] bounds];
-        frame.origin.x   = -(SNStackNavigationCornerRadius + 40);
-        frame.size.width += SNStackNavigationCornerRadius + 40;
+        frame.origin.x   = -(SNStackNavigationCornerRadius + _SNStackNavigationShadowWidth);
+        frame.size.width += SNStackNavigationCornerRadius + _SNStackNavigationShadowWidth;
 
         [[CONTENT_VIEW rightMaskLayer] setFrame:frame];
 
@@ -1506,7 +1507,7 @@ typedef enum
     {
         SNShadowView *shadowView;
 
-        shadowView = [[SNShadowView alloc] initWithFrame:CGRectMake(-40, 0, 40, CGRectGetHeight([[self view] bounds]))];
+        shadowView = [[SNShadowView alloc] initWithFrame:CGRectMake(-_SNStackNavigationShadowWidth, 0, _SNStackNavigationShadowWidth, CGRectGetHeight([[self view] bounds]))];
 
         [shadowView setAutoresizingMask:UIViewAutoresizingFlexibleHeight];
         [[viewController view] addSubview:shadowView];
