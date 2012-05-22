@@ -25,8 +25,6 @@ static CGFloat const _SNStackNavigationBounceAnimationDuration      = 0.2;
 static CGFloat const _SNStackNavigationMoveOffset                   = 10;
 static CGFloat const _SNStackNavigationShadowWidth                  = 40;
 
-static NSString * const _SNStackNavigationWillCuttingDownObservingKey   = @"_willCuttingDown";
-
 typedef enum
 {
     _SNStackNavigationDragDirectionNone,
@@ -89,7 +87,6 @@ typedef enum
 #pragma mark - Private Methods
 
 - (void)_initializeViewControllers;
-- (void)_initializeWillCuttingDown;
 
 - (void)_initializeContentView;
 - (void)_initializePanGesture;
@@ -131,6 +128,30 @@ typedef enum
 @synthesize delegate = _delegate;
 @synthesize minimumTabWidth = _minimumTabWidth;
 @synthesize tabWidth = _tabWidth;
+
+
+- (void)set_willCuttingDown:(BOOL)willCuttingDown
+{
+    if (_willCuttingDown != willCuttingDown)
+    {
+        _willCuttingDown = willCuttingDown;
+
+        if (_willCuttingDown)
+        {
+            if ([_delegate respondsToSelector:@selector(stackNavigationControllerBeginCuttingDown:)])
+            {
+                [_delegate stackNavigationControllerBeginCuttingDown:self];
+            }
+        }
+        else
+        {
+            if ([_delegate respondsToSelector:@selector(stackNavigationControllerCancelCuttingDown:)])
+            {
+                [_delegate stackNavigationControllerCancelCuttingDown:self];
+            }
+        }
+    }
+}
 
 
 - (void)setMinimumTabWidth:(CGFloat)minimumTabWidth
@@ -184,9 +205,9 @@ typedef enum
         _tabWidth           = _SNStackNavigationDefaultToolbarWidth;
         _minimumTabWidth    = _SNStackNavigationDefaultToolbarMinimumWidth;
         _tabEndX            = _tabWidth - _minimumTabWidth;
+        _willCuttingDown    = NO;
 
         [self _initializeViewControllers];
-        [self _initializeWillCuttingDown];
     }
 
     return self;
@@ -196,53 +217,6 @@ typedef enum
 - (void)_initializeViewControllers
 {
     [self set_viewControllers:[NSMutableArray array]];
-}
-
-
-- (void)_initializeWillCuttingDown
-{
-    _willCuttingDown = NO;
-
-    [self addObserver:self
-           forKeyPath:_SNStackNavigationWillCuttingDownObservingKey
-              options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-              context:NULL];
-}
-
-
-- (void)dealloc
-{
-    [self removeObserver:self forKeyPath:_SNStackNavigationWillCuttingDownObservingKey];
-}
-
-
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context
-{
-    if ([keyPath isEqualToString:_SNStackNavigationWillCuttingDownObservingKey])
-    {
-        if ([[change objectForKey:NSKeyValueChangeNewKey] isEqualToNumber:[change objectForKey:NSKeyValueChangeOldKey]])
-        {
-            return;
-        }
-
-        if (_willCuttingDown)
-        {
-            if ([_delegate respondsToSelector:@selector(stackNavigationControllerBeginCuttingDown:)])
-            {
-                [_delegate stackNavigationControllerBeginCuttingDown:self];
-            }
-        }
-        else
-        {
-            if ([_delegate respondsToSelector:@selector(stackNavigationControllerCancelCuttingDown:)])
-            {
-                [_delegate stackNavigationControllerCancelCuttingDown:self];
-            }
-        }
-    }
 }
 
 
