@@ -1038,12 +1038,12 @@ typedef enum
 
 - (void)_onPanGesture:(UIPanGestureRecognizer *)recognizer
 {
-    static CGPoint  lastTouchLocation, startPointOfRightView, startPointOfLeftView, translationStart;
-    _SNStackNavigationDragDirectionType dragDirection;
-    CGPoint translation, location;
+    static _SNStackNavigationDragDirectionType dragDirection;
+    static CGFloat lastTouchLocation, lastTranslation, startPointOfRightView, startPointOfLeftView;
+    CGFloat translation, location;
 
-    translation = [recognizer translationInView:[self view]];
-    location    = [recognizer locationInView:[self view]];
+    translation = [recognizer translationInView:[self view]].x;
+    location    = [recognizer locationInView:[self view]].x;
 
     [[MORE_LEFT_VIEW layer] removeAllAnimations];
     [[LEFT_VIEW layer] removeAllAnimations];
@@ -1052,279 +1052,209 @@ typedef enum
 
     if ([recognizer state] == UIGestureRecognizerStateBegan)
     {
-        translationStart        = translation;
-        startPointOfLeftView    = LEFT_VIEW.frame.origin;
-        startPointOfRightView   = RIGHT_VIEW.frame.origin;
+        lastTranslation         = translation;
+        startPointOfLeftView    = LEFT_VIEW.frame.origin.x;
+        startPointOfRightView   = RIGHT_VIEW.frame.origin.x;
+        dragDirection           = _SNStackNavigationDragDirectionNone;
     }
     else
     {
-        _SNStackNavigationStateType state;
-
-        dragDirection = _SNStackNavigationDragDirectionNone;
-        if (location.x < lastTouchLocation.x)
+        if (location < lastTouchLocation)
         {
             dragDirection = _SNStackNavigationDragDirectionLeft;
         }
-        else if (location.x > lastTouchLocation.x)
+        else if (location > lastTouchLocation)
         {
             dragDirection = _SNStackNavigationDragDirectionRight;
         }
 
-        state = [self _decideMainState];
-
-        if (state == _SNStackNavigationStateL)
+        if (!RIGHT_VIEW)
         {
-            LEFT_VIEW_SET_X(startPointOfLeftView.x + translation.x * _SNStackNavigationMoveFrictionCoEfficient);
+            LEFT_VIEW_SET_X(startPointOfLeftView + translation * _SNStackNavigationMoveFrictionCoEfficient);
         }
-        else if (state == _SNStackNavigationStateLR)
+        else
         {
-            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
+            if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
-                RIGHT_VIEW_SET_X(startPointOfRightView.x + translationStart.x + (translation.x - translationStart.x) * _SNStackNavigationMoveFrictionCoEfficient);
-            }
-            else if (RIGHT_VIEW_FOLDED_X < CGRectGetMinX(RIGHT_VIEW_FRAME) &&
-                     CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
-            {
-                if (dragDirection == _SNStackNavigationDragDirectionLeft)
+                if (!MORE_LEFT_VIEW &&
+                    CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX)
                 {
-                    RIGHT_VIEW_SET_X(startPointOfRightView.x + translation.x);
-                }
-                else
-                {
-                    RIGHT_VIEW_SET_X(MIN(startPointOfRightView.x + translation.x, CGRectGetMaxX(LEFT_VIEW_FRAME)));
-                }
+                    CGFloat leftViewX;
 
-                translationStart = translation;
-            }
-            else if (CGRectGetMaxX(LEFT_VIEW_FRAME) <= CGRectGetMinX(RIGHT_VIEW_FRAME))
-            {
-                CGFloat coefficient = 1;
-
-                if (0 < CGRectGetMinX(LEFT_VIEW_FRAME))
-                {
-                    coefficient = _SNStackNavigationMoveFrictionCoEfficient;
-                }
-                else
-                {
-                    translationStart = translation;
-                }
-
-                RIGHT_VIEW_SET_X(startPointOfRightView.x + translationStart.x + (translation.x - translationStart.x) * coefficient);
-
-                if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
-                {
-                    LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
-                }
-                else
-                {
-                    LEFT_VIEW_SET_X(0);
-                }
-            }
-
-            if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
-            {
-                [self set_willCuttingDown:YES];
-            }
-            else
-            {
-                [self set_willCuttingDown:NO];
-            }
-        }
-        else if (state == _SNStackNavigationStateLRMR)
-        {
-            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= 0)
-            {
-                [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
-                [CONTENT_VIEW setLeftView:RIGHT_VIEW];
-                [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
-
-                if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
-                {
-                    [CONTENT_VIEW setMoreRightView:nil];
-                }
-                else
-                {
-                    [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
-                }
-
-                startPointOfLeftView    = LEFT_VIEW_FRAME.origin;
-                startPointOfRightView   = RIGHT_VIEW_FRAME.origin;
-                translationStart        = translation;
-            }
-            else if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
-            {
-                RIGHT_VIEW_SET_X(MAX(startPointOfRightView.x + translation.x, 0));
-                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-            }
-            else if (RIGHT_VIEW_FOLDED_X < CGRectGetMinX(RIGHT_VIEW_FRAME) &&
-                     CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
-            {
-                if (dragDirection == _SNStackNavigationDragDirectionLeft)
-                {
-                    RIGHT_VIEW_SET_X(startPointOfRightView.x + translation.x);
-                }
-                else
-                {
-                    RIGHT_VIEW_SET_X(MIN(startPointOfRightView.x + translation.x, CGRectGetMaxX(LEFT_VIEW_FRAME)));
-                }
-
-                translationStart = translation;
-            }
-            else if (CGRectGetMaxX(LEFT_VIEW_FRAME) <= CGRectGetMinX(RIGHT_VIEW_FRAME))
-            {
-                CGFloat coefficient = 1;
-
-                if (0 < CGRectGetMinX(LEFT_VIEW_FRAME))
-                {
-                    coefficient = _SNStackNavigationMoveFrictionCoEfficient;
-                }
-                else
-                {
-                    translationStart = translation;
-                }
-
-                RIGHT_VIEW_SET_X(startPointOfRightView.x + translationStart.x + (translation.x - translationStart.x) * coefficient);
-
-                if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
-                {
-                    LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
-                }
-                else
-                {
-                    LEFT_VIEW_SET_X(0);
-                }
-            }
-
-            if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
-            {
-                [self set_willCuttingDown:YES];
-            }
-            else
-            {
-                [self set_willCuttingDown:NO];
-            }
-        }
-        else if (state == _SNStackNavigationStateMLLR)
-        {
-            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
-            {
-                RIGHT_VIEW_SET_X(startPointOfRightView.x + translationStart.x + (translation.x - translationStart.x) * _SNStackNavigationMoveFrictionCoEfficient);
-            }
-            else if (RIGHT_VIEW_FOLDED_X < CGRectGetMinX(RIGHT_VIEW_FRAME) &&
-                     CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
-            {
-                if (dragDirection == _SNStackNavigationDragDirectionLeft)
-                {
-                    if (startPointOfRightView.x + (translation.x - translationStart.x) <= RIGHT_VIEW_FOLDED_X)
+                    leftViewX = floorf(startPointOfLeftView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
+                    if (leftViewX <= _tabEndX)
                     {
-                        RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                        startPointOfLeftView    = _tabEndX;
+                        lastTranslation         = translation + (_tabEndX - leftViewX);
+                    }
 
-                        startPointOfRightView = RIGHT_VIEW_FRAME.origin;
-                        translationStart = translation;
+                    LEFT_VIEW_SET_X(leftViewX);
+                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                }
+                else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
+                {
+                    if (CGRectGetMinX(LEFT_VIEW_FRAME) > 0)
+                    {
+                        CGFloat leftViewX;
+
+                        leftViewX = floorf(startPointOfLeftView + translation - lastTranslation);
+                        if (leftViewX < 0)
+                        {
+                            startPointOfRightView   = CGRectGetMaxX(LEFT_VIEW_FRAME);
+                            lastTranslation         = translation;
+
+                            LEFT_VIEW_SET_X(0);
+
+                            if (MORE_RIGHT_VIEW)
+                            {
+                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            }
+                            else
+                            {
+                                CGFloat rightViewX;
+
+                                rightViewX = floorf(startPointOfRightView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
+
+                                RIGHT_VIEW_SET_X(MIN(rightViewX, CGRectGetMaxX(LEFT_VIEW_FRAME)));
+                            }
+                        }
+                        else
+                        {
+                            LEFT_VIEW_SET_X(leftViewX);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        }
+                    }
+                    else if (MORE_RIGHT_VIEW)
+                    {
+                        LEFT_VIEW_SET_X(0);
+
+                        [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
+                        [CONTENT_VIEW setLeftView:RIGHT_VIEW];
+                        [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
+
+                        if (MORE_RIGHT_VIEW)
+                        {
+                            if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
+                            {
+                                [CONTENT_VIEW setMoreRightView:nil];
+                            }
+                            else
+                            {
+                                [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
+                            }
+                        }
+
+                        startPointOfLeftView    = LEFT_VIEW_FRAME.origin.x;
+                        startPointOfRightView   = RIGHT_VIEW_FRAME.origin.x;
+                        lastTranslation         = translation;
                     }
                     else
                     {
-                        RIGHT_VIEW_SET_X(startPointOfRightView.x + (translation.x - translationStart.x));
+                        CGFloat rightViewX;
+
+                        rightViewX = floorf(startPointOfRightView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
+                        if (CGRectGetMinX(RIGHT_VIEW_FRAME) > rightViewX)
+                        {
+                            RIGHT_VIEW_SET_X(startPointOfRightView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
+                        }
+
+                        LEFT_VIEW_SET_X(0);
                     }
                 }
                 else
                 {
-                    RIGHT_VIEW_SET_X(MIN(startPointOfRightView.x + (translation.x - translationStart.x), CGRectGetMaxX(LEFT_VIEW_FRAME)));
+                    LEFT_VIEW_SET_X(startPointOfLeftView + translation - lastTranslation);
+                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                 }
             }
-            else if (CGRectGetMaxX(LEFT_VIEW_FRAME) <= CGRectGetMinX(RIGHT_VIEW_FRAME))
+            else if (dragDirection == _SNStackNavigationDragDirectionRight)
             {
-                RIGHT_VIEW_SET_X(startPointOfRightView.x + (translation.x - translationStart.x));
-
-                if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
+                if (!MORE_LEFT_VIEW &&
+                    CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX)
                 {
-                    LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
+                    LEFT_VIEW_SET_X(startPointOfLeftView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
+                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                 }
                 else
                 {
-                    LEFT_VIEW_SET_X(0);
+                    if (!MORE_RIGHT_VIEW &&
+                        CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
+                    {
+                        CGFloat rightViewX;
 
-                    startPointOfRightView = RIGHT_VIEW_FRAME.origin;
-                    translationStart = translation;
+                        rightViewX = floorf(startPointOfRightView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
+                        if (rightViewX > CGRectGetMaxX(LEFT_VIEW_FRAME))
+                        {
+                            startPointOfLeftView    = 0;
+                            lastTranslation         = translation + (rightViewX - CGRectGetMaxX(LEFT_VIEW_FRAME));
+
+                            LEFT_VIEW_SET_X(startPointOfLeftView + translation - lastTranslation);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        }
+                        else
+                        {
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(rightViewX);
+                        }
+                    }
+                    else if (!MORE_LEFT_VIEW)
+                    {
+                        CGFloat leftViewX;
+
+                        leftViewX = floorf(startPointOfLeftView + translation - lastTranslation);
+                        if (leftViewX > _tabEndX)
+                        {
+                            startPointOfLeftView    = _tabEndX;
+                            lastTranslation         = translation - (leftViewX - _tabEndX);
+                        }
+
+                        LEFT_VIEW_SET_X(leftViewX);
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                    }
+                    else if (CGRectGetMinX(LEFT_VIEW_FRAME) < CGRectGetMaxX(MORE_LEFT_VIEW_FRAME))
+                    {
+                        CGFloat leftViewX;
+
+                        leftViewX = floorf(startPointOfLeftView + translation - lastTranslation);
+
+                        if (leftViewX > CGRectGetMaxX(MORE_LEFT_VIEW_FRAME))
+                        {
+                            [CONTENT_VIEW setMoreRightView:RIGHT_VIEW];
+                            [CONTENT_VIEW setRightView:LEFT_VIEW];
+                            [CONTENT_VIEW setLeftView:MORE_LEFT_VIEW];
+
+                            if (IS_VIEW_ROOT_VIEW(MORE_LEFT_VIEW))
+                            {
+                                [CONTENT_VIEW setMoreLeftView:nil];
+                            }
+                            else
+                            {
+                                [CONTENT_VIEW setMoreLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_LEFT_VIEW] - 1]];
+                            }
+
+                            startPointOfLeftView    = LEFT_VIEW_FRAME.origin.x;
+                            startPointOfRightView   = RIGHT_VIEW_FRAME.origin.x;
+                            lastTranslation         = translation;
+
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                        }
+                        else
+                        {
+                            LEFT_VIEW_SET_X(leftViewX);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        }
+                    }
                 }
             }
-        }
-        else if (state == _SNStackNavigationStateMLLRMR)
-        {
-            if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= 0)
+
+            if (!MORE_LEFT_VIEW &&
+                CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
             {
-                [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
-                [CONTENT_VIEW setLeftView:RIGHT_VIEW];
-                [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
-
-                if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
-                {
-                    [CONTENT_VIEW setMoreRightView:nil];
-                }
-                else
-                {
-                    [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
-                }
-
-                startPointOfLeftView    = LEFT_VIEW_FRAME.origin;
-                startPointOfRightView   = RIGHT_VIEW_FRAME.origin;
-                translationStart        = translation;
+                [self set_willCuttingDown:YES];
             }
-            else if (CGRectGetMaxX(MORE_LEFT_VIEW_FRAME) <= CGRectGetMinX(LEFT_VIEW_FRAME))
+            else
             {
-                [CONTENT_VIEW setMoreRightView:RIGHT_VIEW];
-                [CONTENT_VIEW setRightView:LEFT_VIEW];
-                [CONTENT_VIEW setLeftView:MORE_LEFT_VIEW];
-
-                if (IS_VIEW_ROOT_VIEW(MORE_LEFT_VIEW))
-                {
-                    [CONTENT_VIEW setMoreLeftView:nil];
-                }
-                else
-                {
-                    [CONTENT_VIEW setMoreLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_LEFT_VIEW] - 1]];
-                }
-
-                startPointOfLeftView    = LEFT_VIEW_FRAME.origin;
-                startPointOfRightView   = RIGHT_VIEW_FRAME.origin;
-                translationStart        = translation;
-            }
-            else if (CGRectGetMinX(RIGHT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X)
-            {
-                RIGHT_VIEW_SET_X(MAX(startPointOfRightView.x + translation.x, 0));
-                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-            }
-            else if (RIGHT_VIEW_FOLDED_X < CGRectGetMinX(RIGHT_VIEW_FRAME) &&
-                     CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
-            {
-                if (dragDirection == _SNStackNavigationDragDirectionLeft)
-                {
-                    RIGHT_VIEW_SET_X(startPointOfRightView.x + (translation.x - translationStart.x));
-                }
-                else
-                {
-                    RIGHT_VIEW_SET_X(MIN(startPointOfRightView.x + (translation.x - translationStart.x), CGRectGetMaxX(LEFT_VIEW_FRAME)));
-                }
-            }
-            else if (CGRectGetMaxX(LEFT_VIEW_FRAME) <= CGRectGetMinX(RIGHT_VIEW_FRAME))
-            {
-                RIGHT_VIEW_SET_X(startPointOfRightView.x + (translation.x - translationStart.x));
-
-                if (CGRectGetMaxX(MORE_LEFT_VIEW_FRAME) <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
-                {
-                    LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
-                }
-                else if (0 <= CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME))
-                {
-                    LEFT_VIEW_SET_X(CGRectGetMinX(RIGHT_VIEW_FRAME) - CGRectGetWidth(LEFT_VIEW_FRAME));
-                }
-                else
-                {
-                    LEFT_VIEW_SET_X(0);
-
-                    startPointOfRightView = RIGHT_VIEW_FRAME.origin;
-                    translationStart = translation;
-                }
+                [self set_willCuttingDown:NO];
             }
         }
     }
@@ -1333,7 +1263,7 @@ typedef enum
 
     if ([recognizer state] == UIGestureRecognizerStateEnded)
     {
-        [self _moveToState:translation.x > 0 ? _SNStackNavigationDragDirectionRight : _SNStackNavigationDragDirectionLeft];
+        [self _moveToState:translation > 0 ? _SNStackNavigationDragDirectionRight : _SNStackNavigationDragDirectionLeft];
     }
 }
 
