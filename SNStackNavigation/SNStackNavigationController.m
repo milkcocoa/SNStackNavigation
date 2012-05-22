@@ -949,14 +949,11 @@ typedef enum
                 }
                 else
                 {
-                    CGFloat rightViewX;
-
-                    rightViewX = CGRectGetMaxX(LEFT_VIEW_FRAME);
 
                     animationBlock = ^(void)
                     {
                         LEFT_VIEW_SET_X(0);
-                        RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - _SNStackNavigationMoveOffset);
                     };
 
                     completionBlock = ^(BOOL finished)
@@ -965,7 +962,7 @@ typedef enum
 
                         bounceBlock = ^(void)
                         {
-                            RIGHT_VIEW_SET_X(rightViewX);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                         };
 
                         [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
