@@ -524,6 +524,11 @@ typedef enum
     [CONTENT_VIEW setMoreRightView:nil];
 
     [self _updateCornerRadius];
+
+    if ([_delegate respondsToSelector:@selector(stackNavigationControllerDidCuttingDown:)])
+    {
+        [_delegate stackNavigationControllerDidCuttingDown:self];
+    }
 }
 
 
@@ -1484,6 +1489,41 @@ typedef enum
             }
         }
     }
+}
+
+
+- (void)popToViewController:(UIViewController *)viewController
+                   animated:(BOOL)animated
+{
+    if (animated)
+    {
+
+    }
+
+    void (^removeBlock)(id, NSUInteger, BOOL*);
+
+    NSUInteger index;
+
+    index = [[self viewControllers] indexOfObject:viewController];
+    if (index == NSNotFound)
+    {
+        return;
+    }
+
+    removeBlock = ^(id obj, NSUInteger idx, BOOL *stop)
+    {
+        if (idx > index)
+        {
+            [self _unregisterViewController:obj];
+        }
+        else
+        {
+            *stop = YES;
+        }
+    };
+
+    [[self viewControllers] enumerateObjectsWithOptions:NSEnumerationReverse
+                                             usingBlock:removeBlock];
 }
 
 

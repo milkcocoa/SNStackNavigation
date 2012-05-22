@@ -39,6 +39,9 @@
 - (void)pushViewController:(UIViewController *)viewController
         fromViewController:(UIViewController *)fromViewController
                   animated:(BOOL)animated;
+- (void)popToViewController:(UIViewController *)viewController
+                   animated:(BOOL)animated;
+
 @end
 
 
@@ -55,6 +58,7 @@
 - (void)stackNavigationControllerBeginCuttingDown:(SNStackNavigationController *)stackNavigationController;
 - (void)stackNavigationControllerCancelCuttingDown:(SNStackNavigationController *)stackNavigationController;
 - (void)stackNavigationControllerWillCuttingDown:(SNStackNavigationController *)stackNavigationController;
+- (void)stackNavigationControllerDidCuttingDown:(SNStackNavigationController *)stackNavigationController;
 
 - (void)stackNavigationController:(SNStackNavigationController *)stackNavigationController
              didAddViewController:(UIViewController *)viewController;
