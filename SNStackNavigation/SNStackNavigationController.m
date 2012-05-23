@@ -1212,9 +1212,13 @@ typedef enum
                         CGFloat rightViewX;
 
                         rightViewX = floorf(startPointOfRightView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
-                        if (CGRectGetMinX(RIGHT_VIEW_FRAME) > rightViewX)
+                        if (rightViewX < 0)
                         {
-                            RIGHT_VIEW_SET_X(startPointOfRightView + (translation - lastTranslation) * _SNStackNavigationMoveFrictionCoEfficient);
+                            RIGHT_VIEW_SET_X(0);
+                        }
+                        else if (CGRectGetMinX(RIGHT_VIEW_FRAME) > rightViewX)
+                        {
+                            RIGHT_VIEW_SET_X(rightViewX);
                         }
 
                         LEFT_VIEW_SET_X(0);
