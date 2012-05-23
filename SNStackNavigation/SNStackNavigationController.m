@@ -72,6 +72,13 @@ typedef enum
 #define MORE_RIGHT_VIEW_FRAME _VIEW_FRAME(MORE_RIGHT_VIEW)
 #define MORE_RIGHT_VIEW_SET_X(_x) _SET_VIEW_X(MORE_RIGHT_VIEW, _x)
 
+#define DEFAULT_ANIMATION(_animation, _completion) \
+    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration                                   \
+                          delay:0                                                                           \
+                        options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone   \
+                     animations:_animation                                                                  \
+                     completion:_completion];
+
 
 #pragma mark - SNStackNavigationController () Interface
 
@@ -465,11 +472,7 @@ typedef enum
                 LEFT_VIEW_SET_X(_tabEndX);
             };
 
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                  delay:0
-                                options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone
-                             animations:bounceBlock
-                             completion:NULL];
+            DEFAULT_ANIMATION(bounceBlock, nil);
         };
     }
     else
@@ -480,9 +483,7 @@ typedef enum
         };
     }
 
-    [UIView animateWithDuration:_SNStackNavigationAnimationDuration
-                     animations:animationBlock
-                     completion:completionBlock];
+    DEFAULT_ANIMATION(animationBlock, completionBlock);
 }
 
 
@@ -557,13 +558,10 @@ typedef enum
                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                     };
 
-                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                     animations:bounceBackAnimation];
+                    DEFAULT_ANIMATION(bounceBackAnimation, nil);
                 };
 
-                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceAnimationBlock
-                                 completion:bounceCompletionBlock];
+                DEFAULT_ANIMATION(bounceAnimationBlock, bounceCompletionBlock);
             };
         }
     }
@@ -592,11 +590,7 @@ typedef enum
                     RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                 };
 
-                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                      delay:0.05
-                                    options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone
-                                 animations:bounceBlock
-                                 completion:NULL];
+                DEFAULT_ANIMATION(bounceBlock, nil);
             };
         }
         else
@@ -615,9 +609,7 @@ typedef enum
         }
     }
 
-    [UIView animateWithDuration:_SNStackNavigationAnimationDuration
-                     animations:animationBlock
-                     completion:completionBlock];
+    DEFAULT_ANIMATION(animationBlock, completionBlock);
 }
 
 
@@ -664,13 +656,10 @@ typedef enum
                         MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                     };
 
-                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                     animations:bounceBackAnimationBlock];
+                    DEFAULT_ANIMATION(bounceBackAnimationBlock, nil);
                 };
 
-                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceAnimationBlock
-                                 completion:bounceCompletionBlock];
+                DEFAULT_ANIMATION(bounceAnimationBlock, bounceCompletionBlock);
             };
         }
     }
@@ -730,21 +719,15 @@ typedef enum
                         }
                     };
 
-                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                     animations:bounceBackAnimationBlock
-                                     completion:bounceBackCompletionBlock];
+                    DEFAULT_ANIMATION(bounceBackAnimationBlock, bounceBackCompletionBlock);
                 };
 
-                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceAnimationBlock
-                                 completion:bounceCompletionBlock];
+                DEFAULT_ANIMATION(bounceAnimationBlock, bounceCompletionBlock);
             };
         }
     }
 
-    [UIView animateWithDuration:_SNStackNavigationAnimationDuration
-                     animations:animationBlock
-                     completion:completionBlock];
+    DEFAULT_ANIMATION(animationBlock, completionBlock);
 }
 
 
@@ -802,13 +785,10 @@ typedef enum
                         MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                     };
 
-                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                     animations:bounceBackAnimationBlock];
+                    DEFAULT_ANIMATION(bounceBackAnimationBlock, nil);
                 };
 
-                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceAnimationBlock
-                                 completion:bounceAnimationCompletionBlock];
+                DEFAULT_ANIMATION(bounceAnimationBlock, bounceAnimationCompletionBlock);
             };
         }
     }
@@ -838,8 +818,7 @@ typedef enum
                     MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                 };
 
-                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceBackAnimationBlock];
+                DEFAULT_ANIMATION(bounceBackAnimationBlock, nil);
             };
         }
         else
@@ -853,9 +832,7 @@ typedef enum
         }
     }
 
-    [UIView animateWithDuration:_SNStackNavigationAnimationDuration
-                     animations:animationBlock
-                     completion:completionBlock];
+    DEFAULT_ANIMATION(animationBlock, completionBlock);
 }
 
 
@@ -909,8 +886,7 @@ typedef enum
                                 RIGHT_VIEW_SET_X(rightViewX);
                             };
 
-                            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                             animations:bounceBlock];
+                            DEFAULT_ANIMATION(bounceBlock, nil);
                         };
                     }
                     else
@@ -1013,13 +989,10 @@ typedef enum
                                     RIGHT_VIEW_SET_X(rightViewX);
                                 };
 
-                                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                                 animations:bounceBackAnimation];
+                                DEFAULT_ANIMATION(bounceBackAnimation, nil);
                             };
 
-                            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                             animations:bounceBlock
-                                             completion:bounceCompletionBlock];
+                            DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
                         };
                     }
                 }
@@ -1042,8 +1015,7 @@ typedef enum
                                 RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                             };
 
-                            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                             animations:bounceBlock];
+                            DEFAULT_ANIMATION(bounceBlock, nil);
                         };
                     }
                     else
@@ -1091,9 +1063,7 @@ typedef enum
         }
     }
 
-    [UIView animateWithDuration:_SNStackNavigationAnimationDuration
-                     animations:animationBlock
-                     completion:completionBlock];
+    DEFAULT_ANIMATION(animationBlock, completionBlock);
 }
 
 
@@ -1279,7 +1249,7 @@ typedef enum
                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                         MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                     }
-                    else if (CGRectGetMinX(LEFT_VIEW_FRAME) < CGRectGetMaxX(MORE_LEFT_VIEW_FRAME))
+                    else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= CGRectGetMaxX(MORE_LEFT_VIEW_FRAME))
                     {
                         CGFloat leftViewX;
 
@@ -1310,6 +1280,7 @@ typedef enum
                         {
                             LEFT_VIEW_SET_X(leftViewX);
                             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         }
                     }
                 }
@@ -1494,8 +1465,7 @@ typedef enum
 
         if (animated)
         {
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                             animations:animationsBlock];
+            DEFAULT_ANIMATION(animationsBlock, nil);
         }
         else
         {
@@ -1527,8 +1497,7 @@ typedef enum
 
             if (animated)
             {
-                [UIView animateWithDuration:_SNStackNavigationAnimationDuration
-                                 animations:animationsBlock];
+                DEFAULT_ANIMATION(animationsBlock, nil);
             }
             else
             {
@@ -1544,8 +1513,7 @@ typedef enum
 
             if (animated)
             {
-                [UIView animateWithDuration:_SNStackNavigationAnimationDuration
-                                 animations:animationsBlock];
+                DEFAULT_ANIMATION(animationsBlock, nil);
             }
             else
             {
