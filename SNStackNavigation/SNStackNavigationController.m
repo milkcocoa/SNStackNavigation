@@ -102,12 +102,15 @@ typedef enum
 
 - (_SNStackNavigationStateType)_decideMainState;
 
-- (void)_moveToStateL:(_SNStackNavigationDragDirectionType)dragDirection;
 - (void)_cutDownViewControllersExceptRootViewController;
-- (void)_moveToStateLRWithRightDirection;
-- (void)_moveToStateMLLRWithRightDirection;
-- (void)_moveToStateMLLRMRWithLeftDirection;
-- (void)_moveToState:(_SNStackNavigationDragDirectionType)dragDirection;
+
+- (void)_moveToStateL:(_SNStackNavigationDragDirectionType)dragDirection
+               bounce:(BOOL)bounce;
+- (void)_moveToStateLRWithRightDirectionWithBounce:(BOOL)bounce;
+- (void)_moveToStateMLLRWithRightDirectionWithBounce:(BOOL)bounce;
+- (void)_moveToStateMLLRMRWithLeftDirectionWithBounce:(BOOL)bounce;
+- (void)_moveToState:(_SNStackNavigationDragDirectionType)dragDirection
+              bounce:(BOOL)bounce;
 
 @end
 
@@ -437,34 +440,45 @@ typedef enum
 
 
 - (void)_moveToStateL:(_SNStackNavigationDragDirectionType)dragDirection
+               bounce:(BOOL)bounce
 {
     void (^animationBlock)(void);
     void (^completionBlock)(BOOL);
 
-    int offsetDirection;
-
-    offsetDirection = dragDirection == _SNStackNavigationDragDirectionLeft ? 1 : -1;
-
-    animationBlock = ^(void)
+    if (bounce)
     {
-        LEFT_VIEW_SET_X(_tabEndX +  _SNStackNavigationMoveOffset * offsetDirection);
-    };
+        int offsetDirection;
 
-    completionBlock = ^(BOOL finished)
+        offsetDirection = dragDirection == _SNStackNavigationDragDirectionLeft ? 1 : -1;
+
+        animationBlock = ^(void)
+        {
+            LEFT_VIEW_SET_X(_tabEndX +  _SNStackNavigationMoveOffset * offsetDirection);
+        };
+
+        completionBlock = ^(BOOL finished)
+        {
+            void (^bounceBlock)(void);
+
+            bounceBlock = ^(void)
+            {
+                LEFT_VIEW_SET_X(_tabEndX);
+            };
+
+            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                  delay:0
+                                options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone
+                             animations:bounceBlock
+                             completion:NULL];
+        };
+    }
+    else
     {
-        void (^bounceBlock)(void);
-
-        bounceBlock = ^(void)
+        animationBlock = ^(void)
         {
             LEFT_VIEW_SET_X(_tabEndX);
         };
-
-        [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                              delay:0
-                            options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone
-                         animations:bounceBlock
-                         completion:NULL];
-    };
+    }
 
     [UIView animateWithDuration:_SNStackNavigationAnimationDuration
                      animations:animationBlock
@@ -506,7 +520,7 @@ typedef enum
 }
 
 
-- (void)_moveToStateLRWithRightDirection
+- (void)_moveToStateLRWithRightDirectionWithBounce:(BOOL)bounce
 {
     void (^animationBlock)(void);
     void (^completionBlock)(BOOL);
@@ -519,66 +533,81 @@ typedef enum
             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
         };
 
-        completionBlock = ^(BOOL finished)
+        if (bounce)
         {
-            void (^bounceAnimationBlock)(void);
-            void (^bounceCompletionBlock)(BOOL);
-
-            bounceAnimationBlock = ^(void)
+            completionBlock = ^(BOOL finished)
             {
-                LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
-                // -1 is so as not to appear background for an instant
-                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - 1);
+                void (^bounceAnimationBlock)(void);
+                void (^bounceCompletionBlock)(BOOL);
+
+                bounceAnimationBlock = ^(void)
+                {
+                    LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                    // -1 is so as not to appear background for an instant
+                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - 1);
+                };
+
+                bounceCompletionBlock = ^(BOOL finished)
+                {
+                    void (^bounceBackAnimation)(void);
+
+                    bounceBackAnimation = ^(void)
+                    {
+                        LEFT_VIEW_SET_X(0);
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                    };
+
+                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                     animations:bounceBackAnimation];
+                };
+
+                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                 animations:bounceAnimationBlock
+                                 completion:bounceCompletionBlock];
+            };
+        }
+    }
+    else
+    {
+        if (bounce)
+        {
+            int offsetDirection;
+
+            offsetDirection = CGRectGetMinX(LEFT_VIEW_FRAME) < 0 ? 1 : -1;
+
+            animationBlock = ^(void)
+            {
+                // TODO: 移動距離に応じて変化させる
+                LEFT_VIEW_SET_X(_tabEndX + _SNStackNavigationMoveOffset * offsetDirection);
+                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
             };
 
-            bounceCompletionBlock = ^(BOOL finished)
+            completionBlock = ^(BOOL finished)
             {
-                void (^bounceBackAnimation)(void);
+                void (^bounceBlock)(void);
 
-                bounceBackAnimation = ^(void)
+                bounceBlock = ^(void)
                 {
-                    LEFT_VIEW_SET_X(0);
+                    LEFT_VIEW_SET_X(_tabEndX);
                     RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                 };
 
                 [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceBackAnimation];
+                                      delay:0.05
+                                    options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone
+                                 animations:bounceBlock
+                                 completion:NULL];
             };
-
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                             animations:bounceAnimationBlock
-                             completion:bounceCompletionBlock];
-        };
-    }
-    else
-    {
-        int offsetDirection;
-
-        offsetDirection = CGRectGetMinX(LEFT_VIEW_FRAME) < 0 ? 1 : -1;
-
-        animationBlock = ^(void)
+        }
+        else
         {
-            // TODO: 移動距離に応じて変化させる
-            LEFT_VIEW_SET_X(_tabEndX + _SNStackNavigationMoveOffset * offsetDirection);
-            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-        };
-
-        completionBlock = ^(BOOL finished)
-        {
-            void (^bounceBlock)(void);
-
-            bounceBlock = ^(void)
+            animationBlock = ^(void)
             {
+                // TODO: 移動距離に応じて変化させる
                 LEFT_VIEW_SET_X(_tabEndX);
                 RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
             };
-
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                  delay:0.05
-                                options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone
-                             animations:bounceBlock
-                             completion:NULL];
-        };
+        }
 
         if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
         {
@@ -592,7 +621,7 @@ typedef enum
 }
 
 
-- (void)_moveToStateMLLRWithRightDirection
+- (void)_moveToStateMLLRWithRightDirectionWithBounce:(BOOL)bounce
 {
     void (^animationBlock)(void);
     void (^completionBlock)(BOOL);
@@ -609,36 +638,38 @@ typedef enum
             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
         };
 
-        completionBlock = ^(BOOL finished)
+        if (bounce)
         {
-            void (^bounceAnimationBlock)(void);
-            void (^bounceCompletionBlock)(BOOL);
-
-            bounceAnimationBlock = ^(void)
+            completionBlock = ^(BOOL finished)
             {
-                LEFT_VIEW_SET_X(leftViewX + _SNStackNavigationMoveOffset);
-                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-            };
+                void (^bounceAnimationBlock)(void);
+                void (^bounceCompletionBlock)(BOOL);
 
-            bounceCompletionBlock = ^(BOOL finished)
-            {
-                void (^bounceBackAnimationBlock)(void);
-
-                bounceBackAnimationBlock = ^(void)
+                bounceAnimationBlock = ^(void)
                 {
-                    LEFT_VIEW_SET_X(leftViewX);
+                    LEFT_VIEW_SET_X(leftViewX + _SNStackNavigationMoveOffset);
                     RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                 };
 
+                bounceCompletionBlock = ^(BOOL finished)
+                {
+                    void (^bounceBackAnimationBlock)(void);
+
+                    bounceBackAnimationBlock = ^(void)
+                    {
+                        LEFT_VIEW_SET_X(leftViewX);
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                    };
+
+                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                     animations:bounceBackAnimationBlock];
+                };
+
                 [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceBackAnimationBlock];
+                                 animations:bounceAnimationBlock
+                                 completion:bounceCompletionBlock];
             };
-
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                             animations:bounceAnimationBlock
-                             completion:bounceCompletionBlock];
-        };
-
+        }
     }
     else
     {
@@ -654,55 +685,58 @@ typedef enum
             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
         };
 
-        completionBlock = ^(BOOL finished)
+        if (bounce)
         {
-            void (^bounceAnimationBlock)(void);
-            void (^bounceCompletionBlock)(BOOL);
-
-            bounceAnimationBlock = ^(void)
+            completionBlock = ^(BOOL finished)
             {
-                MORE_LEFT_VIEW_SET_X(moreLeftViewX + _SNStackNavigationMoveOffset);
-                LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
-            };
+                void (^bounceAnimationBlock)(void);
+                void (^bounceCompletionBlock)(BOOL);
 
-            bounceCompletionBlock = ^(BOOL finished)
-            {
-                void (^bounceBackAnimationBlock)(void);
-                void (^bounceBackCompletionBlock)(BOOL);
-
-                bounceBackAnimationBlock = ^(void)
+                bounceAnimationBlock = ^(void)
                 {
-                    LEFT_VIEW_SET_X(leftViewX);
-                    MORE_LEFT_VIEW_SET_X(moreLeftViewX);
+                    MORE_LEFT_VIEW_SET_X(moreLeftViewX + _SNStackNavigationMoveOffset);
+                    LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
                 };
 
-                bounceBackCompletionBlock = ^(BOOL finished)
+                bounceCompletionBlock = ^(BOOL finished)
                 {
-                    RIGHT_VIEW_SET_X(CGRectGetMaxX(STACKED_VIEWS_FRAME));
+                    void (^bounceBackAnimationBlock)(void);
+                    void (^bounceBackCompletionBlock)(BOOL);
 
-                    [CONTENT_VIEW setMoreRightView:RIGHT_VIEW];
-                    [CONTENT_VIEW setRightView:LEFT_VIEW];
-                    [CONTENT_VIEW setLeftView:MORE_LEFT_VIEW];
+                    bounceBackAnimationBlock = ^(void)
+                    {
+                        LEFT_VIEW_SET_X(leftViewX);
+                        MORE_LEFT_VIEW_SET_X(moreLeftViewX);
+                    };
 
-                    if (IS_VIEW_ROOT_VIEW(MORE_LEFT_VIEW))
+                    bounceBackCompletionBlock = ^(BOOL finished)
                     {
-                        [CONTENT_VIEW setMoreLeftView:nil];
-                    }
-                    else
-                    {
-                        [CONTENT_VIEW setMoreLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_LEFT_VIEW] - 1]];
-                    }
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX(STACKED_VIEWS_FRAME));
+
+                        [CONTENT_VIEW setMoreRightView:RIGHT_VIEW];
+                        [CONTENT_VIEW setRightView:LEFT_VIEW];
+                        [CONTENT_VIEW setLeftView:MORE_LEFT_VIEW];
+
+                        if (IS_VIEW_ROOT_VIEW(MORE_LEFT_VIEW))
+                        {
+                            [CONTENT_VIEW setMoreLeftView:nil];
+                        }
+                        else
+                        {
+                            [CONTENT_VIEW setMoreLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_LEFT_VIEW] - 1]];
+                        }
+                    };
+
+                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                     animations:bounceBackAnimationBlock
+                                     completion:bounceBackCompletionBlock];
                 };
 
                 [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceBackAnimationBlock
-                                 completion:bounceBackCompletionBlock];
+                                 animations:bounceAnimationBlock
+                                 completion:bounceCompletionBlock];
             };
-
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                             animations:bounceAnimationBlock
-                             completion:bounceCompletionBlock];
-        };
+        }
     }
 
     [UIView animateWithDuration:_SNStackNavigationAnimationDuration
@@ -711,7 +745,7 @@ typedef enum
 }
 
 
-- (void)_moveToStateMLLRMRWithLeftDirection
+- (void)_moveToStateMLLRMRWithLeftDirectionWithBounce:(BOOL)bounce
 {
     void (^animationBlock)(void);
     void (^completionBlock)(BOOL);
@@ -729,48 +763,51 @@ typedef enum
             MORE_RIGHT_VIEW_SET_X(moreRightViewX);
         };
 
-        completionBlock = ^(BOOL finished)
+        if (bounce)
         {
-            void (^bounceAnimationBlock)(void);
-            void (^bounceAnimationCompletionBlock)(BOOL);
-
-            [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
-            [CONTENT_VIEW setLeftView:RIGHT_VIEW];
-            [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
-
-            if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
+            completionBlock = ^(BOOL finished)
             {
-                [CONTENT_VIEW setMoreRightView:nil];
-            }
-            else
-            {
-                [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
-            }
+                void (^bounceAnimationBlock)(void);
+                void (^bounceAnimationCompletionBlock)(BOOL);
 
-            bounceAnimationBlock = ^(void)
-            {
-                RIGHT_VIEW_SET_X(moreRightViewX - _SNStackNavigationMoveOffset);
-                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-            };
+                [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
+                [CONTENT_VIEW setLeftView:RIGHT_VIEW];
+                [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
 
-            bounceAnimationCompletionBlock = ^(BOOL finished)
-            {
-                void (^bounceBackAnimationBlock)(void);
-
-                bounceBackAnimationBlock = ^(void)
+                if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
                 {
-                    RIGHT_VIEW_SET_X(moreRightViewX);
+                    [CONTENT_VIEW setMoreRightView:nil];
+                }
+                else
+                {
+                    [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
+                }
+
+                bounceAnimationBlock = ^(void)
+                {
+                    RIGHT_VIEW_SET_X(moreRightViewX - _SNStackNavigationMoveOffset);
                     MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                 };
 
-                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                 animations:bounceBackAnimationBlock];
-            };
+                bounceAnimationCompletionBlock = ^(BOOL finished)
+                {
+                    void (^bounceBackAnimationBlock)(void);
 
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                             animations:bounceAnimationBlock
-                             completion:bounceAnimationCompletionBlock];
-        };
+                    bounceBackAnimationBlock = ^(void)
+                    {
+                        RIGHT_VIEW_SET_X(moreRightViewX);
+                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                    };
+
+                    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                     animations:bounceBackAnimationBlock];
+                };
+
+                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                 animations:bounceAnimationBlock
+                                 completion:bounceAnimationCompletionBlock];
+            };
+        }
     }
     else
     {
@@ -778,27 +815,39 @@ typedef enum
 
         rightViewX = CGRectGetWidth(STACKED_VIEWS_FRAME) - CGRectGetWidth(RIGHT_VIEW_FRAME);
 
-        animationBlock = ^(void)
+        if (bounce)
         {
-            LEFT_VIEW_SET_X(0);
-            RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
-            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-        };
+            animationBlock = ^(void)
+            {
+                LEFT_VIEW_SET_X(0);
+                RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
+                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+            };
 
-        completionBlock = ^(BOOL finished)
+            completionBlock = ^(BOOL finished)
+            {
+                void (^bounceBackAnimationBlock)(void);
+
+                bounceBackAnimationBlock = ^(void)
+                {
+                    LEFT_VIEW_SET_X(0);
+                    RIGHT_VIEW_SET_X(rightViewX);
+                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                };
+
+                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                 animations:bounceBackAnimationBlock];
+            };
+        }
+        else
         {
-            void (^bounceBackAnimationBlock)(void);
-
-            bounceBackAnimationBlock = ^(void)
+            animationBlock = ^(void)
             {
                 LEFT_VIEW_SET_X(0);
                 RIGHT_VIEW_SET_X(rightViewX);
                 MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
             };
-
-            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                             animations:bounceBackAnimationBlock];
-        };
+        }
     }
 
     [UIView animateWithDuration:_SNStackNavigationAnimationDuration
@@ -808,6 +857,7 @@ typedef enum
 
 
 - (void)_moveToState:(_SNStackNavigationDragDirectionType)dragDirection
+              bounce:(BOOL)bounce
 {
     void (^animationBlock)(void);
     void (^completionBlock)(BOOL);
@@ -816,7 +866,8 @@ typedef enum
     {
         case _SNStackNavigationStateL:
         {
-            [self _moveToStateL:dragDirection];
+            [self _moveToStateL:dragDirection
+                         bounce:bounce];
             break;
         }
 
@@ -838,24 +889,35 @@ typedef enum
 
                     rightViewX = CGRectGetWidth(STACKED_VIEWS_FRAME) - CGRectGetWidth(RIGHT_VIEW_FRAME);
 
-                    animationBlock = ^(void)
+                    if (bounce)
                     {
-                        LEFT_VIEW_SET_X(0);
-                        RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
-                    };
-
-                    completionBlock = ^(BOOL finished)
-                    {
-                        void (^bounceBlock)(void);
-
-                        bounceBlock = ^(void)
+                        animationBlock = ^(void)
                         {
-                            RIGHT_VIEW_SET_X(rightViewX);
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
                         };
 
-                        [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                         animations:bounceBlock];
-                    };
+                        completionBlock = ^(BOOL finished)
+                        {
+                            void (^bounceBlock)(void);
+
+                            bounceBlock = ^(void)
+                            {
+                                RIGHT_VIEW_SET_X(rightViewX);
+                            };
+
+                            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                             animations:bounceBlock];
+                        };
+                    }
+                    else
+                    {
+                        animationBlock = ^(void)
+                        {
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(rightViewX);
+                        };
+                    }
                 }
                 else
                 {
@@ -868,7 +930,7 @@ typedef enum
             }
             else if (dragDirection == _SNStackNavigationDragDirectionRight)
             {
-                [self _moveToStateLRWithRightDirection];
+                [self _moveToStateLRWithRightDirectionWithBounce:bounce];
             }
 
             break;
@@ -888,7 +950,7 @@ typedef enum
                 }
                 else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
                 {
-                    [self _moveToStateMLLRMRWithLeftDirection];
+                    [self _moveToStateMLLRMRWithLeftDirectionWithBounce:bounce];
                 }
                 else
                 {
@@ -901,7 +963,7 @@ typedef enum
             }
             else if (dragDirection == _SNStackNavigationDragDirectionRight)
             {
-                [self _moveToStateLRWithRightDirection];
+                [self _moveToStateLRWithRightDirectionWithBounce:bounce];
             }
 
             break;
@@ -925,54 +987,75 @@ typedef enum
                         RIGHT_VIEW_SET_X(rightViewX);
                     };
 
-                    completionBlock = ^(BOOL finished)
+                    if (bounce)
                     {
-                        void (^bounceBlock)(void);
-                        void (^bounceCompletionBlock)(BOOL);
-
-                        bounceBlock = ^(void)
+                        completionBlock = ^(BOOL finished)
                         {
-                            LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset * offsetDirection);
-                            RIGHT_VIEW_SET_X(rightViewX + _SNStackNavigationMoveOffset * offsetDirection);
-                        };
+                            void (^bounceBlock)(void);
+                            void (^bounceCompletionBlock)(BOOL);
 
-                        bounceCompletionBlock = ^(BOOL finished)
-                        {
-                            LEFT_VIEW_SET_X(0);
-                            RIGHT_VIEW_SET_X(rightViewX);
-                        };
+                            bounceBlock = ^(void)
+                            {
+                                LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset * offsetDirection);
+                                RIGHT_VIEW_SET_X(rightViewX + _SNStackNavigationMoveOffset * offsetDirection);
+                            };
 
-                        [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                         animations:bounceBlock
-                                         completion:bounceCompletionBlock];
-                    };
+                            bounceCompletionBlock = ^(BOOL finished)
+                            {
+                                void (^bounceBackAnimation)(void);
+
+                                bounceBackAnimation = ^(void)
+                                {
+                                    LEFT_VIEW_SET_X(0);
+                                    RIGHT_VIEW_SET_X(rightViewX);
+                                };
+
+                                [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                                 animations:bounceBackAnimation];
+                            };
+
+                            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                             animations:bounceBlock
+                                             completion:bounceCompletionBlock];
+                        };
+                    }
                 }
                 else
                 {
-
-                    animationBlock = ^(void)
+                    if (bounce)
                     {
-                        LEFT_VIEW_SET_X(0);
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - _SNStackNavigationMoveOffset);
-                    };
-
-                    completionBlock = ^(BOOL finished)
-                    {
-                        void (^bounceBlock)(void);
-
-                        bounceBlock = ^(void)
+                        animationBlock = ^(void)
                         {
-                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - _SNStackNavigationMoveOffset);
                         };
 
-                        [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
-                                         animations:bounceBlock];
-                    };
+                        completionBlock = ^(BOOL finished)
+                        {
+                            void (^bounceBlock)(void);
+
+                            bounceBlock = ^(void)
+                            {
+                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            };
+
+                            [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
+                                             animations:bounceBlock];
+                        };
+                    }
+                    else
+                    {
+                        animationBlock = ^(void)
+                        {
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        };
+                    }
                 }
             }
             else if (dragDirection == _SNStackNavigationDragDirectionRight)
             {
-                [self _moveToStateMLLRWithRightDirection];
+                [self _moveToStateMLLRWithRightDirectionWithBounce:bounce];
             }
 
             break;
@@ -982,11 +1065,11 @@ typedef enum
         {
             if (dragDirection == _SNStackNavigationDragDirectionLeft)
             {
-                [self _moveToStateMLLRMRWithLeftDirection];
+                [self _moveToStateMLLRMRWithLeftDirectionWithBounce:bounce];
             }
             else if (dragDirection == _SNStackNavigationDragDirectionRight)
             {
-                [self _moveToStateMLLRWithRightDirection];
+                [self _moveToStateMLLRWithRightDirectionWithBounce:bounce];
             }
 
             break;
@@ -1239,7 +1322,8 @@ typedef enum
 
     if ([recognizer state] == UIGestureRecognizerStateEnded)
     {
-        [self _moveToState:translation > 0 ? _SNStackNavigationDragDirectionRight : _SNStackNavigationDragDirectionLeft];
+        [self _moveToState:translation > 0 ? _SNStackNavigationDragDirectionRight : _SNStackNavigationDragDirectionLeft
+                    bounce:YES];
     }
 }
 
@@ -1471,8 +1555,6 @@ typedef enum
 
     }
 
-    void (^removeBlock)(id, NSUInteger, BOOL*);
-
     NSUInteger index;
 
     index = [[self viewControllers] indexOfObject:viewController];
@@ -1481,20 +1563,40 @@ typedef enum
         return;
     }
 
-    removeBlock = ^(id obj, NSUInteger idx, BOOL *stop)
-    {
-        if (idx > index)
-        {
-            [self _unregisterViewController:obj];
-        }
-        else
-        {
-            *stop = YES;
-        }
-    };
-
     [[self viewControllers] enumerateObjectsWithOptions:NSEnumerationReverse
-                                             usingBlock:removeBlock];
+                                             usingBlock:^(id obj, NSUInteger idx, BOOL *stop)
+     {
+         if (idx > index)
+         {
+             [self _unregisterViewController:obj];
+         }
+         else
+         {
+             *stop = YES;
+         }
+     }];
+
+    if ([[self _viewControllers] count] == 1)
+    {
+        [CONTENT_VIEW setRightView:nil];
+        [CONTENT_VIEW setLeftView:[viewController view]];
+        [CONTENT_VIEW setMoreRightView:nil];
+        [CONTENT_VIEW setMoreLeftView:nil];
+    }
+    else
+    {
+        [CONTENT_VIEW setRightView:[viewController view]];
+        [CONTENT_VIEW setLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:RIGHT_VIEW] - 1]];
+        [CONTENT_VIEW setMoreRightView:nil];
+        if (!IS_VIEW_ROOT_VIEW(LEFT_VIEW))
+        {
+            [CONTENT_VIEW setMoreLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:LEFT_VIEW] - 1]];
+        }
+    }
+
+    [self _moveToState:_SNStackNavigationDragDirectionRight
+                bounce:NO];
+    [self _updateCornerRadius];
 }
 
 
