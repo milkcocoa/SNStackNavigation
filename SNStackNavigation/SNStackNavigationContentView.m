@@ -40,33 +40,45 @@
 #pragma mark - Properties
 
 
-@synthesize leftMaskLayer;
-@synthesize leftView;
-@synthesize minimumTabWidth;
-@synthesize moreLeftView;
-@synthesize moreRightView;
-@synthesize rightMaskLayer;
-@synthesize rightView;
-@synthesize stackedViews;
-@synthesize tabWidth;
+@synthesize leftMaskLayer = _leftMaskLayer;
+@synthesize leftView = _leftView;
+@synthesize minimumTabWidth = _minimumTabWidth;
+@synthesize moreLeftView = _moreLeftView;
+@synthesize moreRightView = _moreRightView;
+@synthesize rightMaskLayer = _rightMaskLayer;
+@synthesize rightView = _rightView;
+@synthesize shadowWidth = _shadowWidth;
+@synthesize stackedViews = _stackedViews;
+@synthesize tabWidth = _tabWidth;
 
 
-- (void)setMinimumTabWidth:(CGFloat)aMinimumTabWidth
+- (void)setMinimumTabWidth:(CGFloat)minimumTabWidth
 {
-    if (minimumTabWidth != aMinimumTabWidth)
+    if (_minimumTabWidth != minimumTabWidth)
     {
-        minimumTabWidth = aMinimumTabWidth;
+        _minimumTabWidth = minimumTabWidth;
 
         [self setNeedsLayout];
     }
 }
 
 
-- (void)setTabWidth:(CGFloat)aTabWidth
+- (void)setShadowWidth:(CGFloat)shadowWidth
 {
-    if (tabWidth != aTabWidth)
+    if (_shadowWidth != shadowWidth)
     {
-        tabWidth = aTabWidth;
+        _shadowWidth = shadowWidth;
+
+        [self setNeedsLayout];
+    }
+}
+
+
+- (void)setTabWidth:(CGFloat)tabWidth
+{
+    if (_tabWidth != tabWidth)
+    {
+        _tabWidth = tabWidth;
 
         [self setNeedsLayout];
     }
@@ -91,25 +103,25 @@
 
 - (void)_initializeStackedViews
 {
-    stackedViews = [[UIView alloc] initWithFrame:[self bounds]];
-    [self addSubview:stackedViews];
+    _stackedViews = [[UIView alloc] initWithFrame:[self bounds]];
+    [self addSubview:_stackedViews];
 
-    [stackedViews setAutoresizesSubviews:YES];
+    [_stackedViews setAutoresizesSubviews:YES];
 }
 
 
 - (void)_initializeMaskLayers
 {
-    leftMaskLayer = [CALayer layer];
+    _leftMaskLayer = [CALayer layer];
 
-    [leftMaskLayer setAnchorPoint:CGPointZero];
-    [leftMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
-    [leftMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
+    [_leftMaskLayer setAnchorPoint:CGPointZero];
+    [_leftMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
+    [_leftMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
 
-    rightMaskLayer = [CALayer layer];
-    [rightMaskLayer setAnchorPoint:CGPointZero];
-    [rightMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
-    [rightMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
+    _rightMaskLayer = [CALayer layer];
+    [_rightMaskLayer setAnchorPoint:CGPointZero];
+    [_rightMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
+    [_rightMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
 }
 
 
@@ -118,26 +130,26 @@
     CGFloat height;
 
     height = CGRectGetHeight([self bounds]);
-    if (height < CGRectGetHeight([stackedViews frame]))
+    if (height < CGRectGetHeight([_stackedViews frame]))
     {
         // workaround: not to show background, when the rotation (portrait to landscape) occurs
         [CATransaction begin];
         [CATransaction setAnimationDuration:.8];
-        [leftMaskLayer setPosition:CGPointMake(0, 0)];
-        [leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([leftMaskLayer frame]), height)];
-        [rightMaskLayer setPosition:CGPointMake(-SNStackNavigationCornerRadius, 0)];
-        [rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([rightMaskLayer frame]), height)];
+        [_leftMaskLayer setPosition:CGPointMake(0, 0)];
+        [_leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_leftMaskLayer frame]), height)];
+        [_rightMaskLayer setPosition:CGPointMake(-(_shadowWidth + SNStackNavigationCornerRadius), 0)];
+        [_rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_rightMaskLayer frame]), height)];
         [CATransaction commit];
     }
     else
     {
-        [leftMaskLayer setPosition:CGPointMake(0, 0)];
-        [leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([leftMaskLayer frame]), height)];
-        [rightMaskLayer setPosition:CGPointMake(-SNStackNavigationCornerRadius, 0)];
-        [rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([rightMaskLayer frame]), height)];
+        [_leftMaskLayer setPosition:CGPointMake(0, 0)];
+        [_leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_leftMaskLayer frame]), height)];
+        [_rightMaskLayer setPosition:CGPointMake(-(_shadowWidth + SNStackNavigationCornerRadius), 0)];
+        [_rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_rightMaskLayer frame]), height)];
     }
 
-    [stackedViews setFrame:CGRectMake(minimumTabWidth, 0, CGRectGetWidth([self bounds]) - minimumTabWidth, height)];
+    [_stackedViews setFrame:CGRectMake(_minimumTabWidth, 0, CGRectGetWidth([self bounds]) - _minimumTabWidth, height)];
 }
 
 
@@ -147,7 +159,7 @@
     __block UIView  *result;
     __block CGPoint resultPoint;
 
-    [[stackedViews subviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop)
+    [[_stackedViews subviews] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop)
      {
          UIView     *stackedView;
          CGPoint    convertedPoint;

@@ -14,6 +14,7 @@
 
 @property (nonatomic)   CGFloat         tabWidth;
 @property (nonatomic)   CGFloat         minimumTabWidth;
+@property (nonatomic)   CGFloat         shadowWidth;
 
 @property (readonly, nonatomic) CALayer *leftMaskLayer;
 @property (readonly, nonatomic) CALayer *rightMaskLayer;

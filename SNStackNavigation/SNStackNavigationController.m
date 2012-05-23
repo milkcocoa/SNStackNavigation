@@ -260,6 +260,7 @@ typedef enum
     [contentView setAutoresizesSubviews:YES];
     [contentView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight)];
     [contentView setMinimumTabWidth:_minimumTabWidth];
+    [contentView setShadowWidth:_SNStackNavigationShadowWidth];
     [contentView setTabWidth:_tabWidth];
 }
 
