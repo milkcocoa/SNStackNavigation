@@ -573,7 +573,7 @@ typedef enum
         {
             int offsetDirection;
 
-            offsetDirection = CGRectGetMinX(LEFT_VIEW_FRAME) < 0 ? 1 : -1;
+            offsetDirection = CGRectGetMinX(LEFT_VIEW_FRAME) < _tabEndX ? 1 : -1;
 
             animationBlock = ^(void)
             {
@@ -636,6 +636,7 @@ typedef enum
         {
             LEFT_VIEW_SET_X(leftViewX);
             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
         };
 
         if (bounce)
@@ -649,6 +650,7 @@ typedef enum
                 {
                     LEFT_VIEW_SET_X(leftViewX + _SNStackNavigationMoveOffset);
                     RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                 };
 
                 bounceCompletionBlock = ^(BOOL finished)
@@ -659,6 +661,7 @@ typedef enum
                     {
                         LEFT_VIEW_SET_X(leftViewX);
                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                     };
 
                     [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration
@@ -711,7 +714,7 @@ typedef enum
 
                     bounceBackCompletionBlock = ^(BOOL finished)
                     {
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX(STACKED_VIEWS_FRAME));
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX([STACKED_VIEWS bounds]));
 
                         [CONTENT_VIEW setMoreRightView:RIGHT_VIEW];
                         [CONTENT_VIEW setRightView:LEFT_VIEW];
@@ -1181,6 +1184,7 @@ typedef enum
                         {
                             LEFT_VIEW_SET_X(leftViewX);
                             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         }
                     }
                     else if (MORE_RIGHT_VIEW)
@@ -1273,6 +1277,7 @@ typedef enum
 
                         LEFT_VIEW_SET_X(leftViewX);
                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                     }
                     else if (CGRectGetMinX(LEFT_VIEW_FRAME) < CGRectGetMaxX(MORE_LEFT_VIEW_FRAME))
                     {
