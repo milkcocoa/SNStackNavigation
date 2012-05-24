@@ -33,17 +33,6 @@ typedef enum
 } _SNStackNavigationDragDirectionType;
 
 
-typedef enum
-{
-    _SNStackNavigationStateNone,
-    _SNStackNavigationStateL,
-    _SNStackNavigationStateLR,
-    _SNStackNavigationStateLRMR,
-    _SNStackNavigationStateMLLR,
-    _SNStackNavigationStateMLLRMR,
-} _SNStackNavigationStateType;
-
-
 #define CONTENT_VIEW (SNStackNavigationContentView *)[self view]
 #define STACKED_VIEWS [CONTENT_VIEW stackedViews]
 #define STACKED_VIEWS_FRAME [STACKED_VIEWS frame]
@@ -53,7 +42,7 @@ typedef enum
 #define _VIEW(_viewName) [CONTENT_VIEW _viewName]
 #define _VIEW_FRAME(_name) [_name frame]
 #define _SET_VIEW_FRAME(_name, _x, _y, _width, _height) [_name setFrame:CGRectMake((_x), (_y), (_width), (_height))]
-#define _SET_VIEW_X(_name, _x) _SET_VIEW_FRAME(_name, floorf(_x), 0, CGRectGetWidth([_name frame]), CGRectGetHeight([_name frame]))
+#define _SET_VIEW_X(_name, _x) _SET_VIEW_FRAME(_name, floorf(_x), 0, CGRectGetWidth([_name frame]), CGRectGetHeight([STACKED_VIEWS bounds]))
 
 #define LEFT_VIEW _VIEW(leftView)
 #define LEFT_VIEW_FRAME _VIEW_FRAME(LEFT_VIEW)
@@ -107,15 +96,8 @@ typedef enum
 
 - (void)_updateCornerRadius;
 
-- (_SNStackNavigationStateType)_decideMainState;
-
 - (void)_cutDownViewControllersExceptRootViewController;
 
-- (void)_moveToStateL:(_SNStackNavigationDragDirectionType)dragDirection
-               bounce:(BOOL)bounce;
-- (void)_moveToStateLRWithRightDirectionWithBounce:(BOOL)bounce;
-- (void)_moveToStateMLLRWithRightDirectionWithBounce:(BOOL)bounce;
-- (void)_moveToStateMLLRMRWithLeftDirectionWithBounce:(BOOL)bounce;
 - (void)_moveToState:(_SNStackNavigationDragDirectionType)dragDirection
               bounce:(BOOL)bounce;
 
@@ -350,6 +332,11 @@ typedef enum
         }
     }
 
+    if (CGRectGetMaxX(RIGHT_VIEW_FRAME) < CGRectGetWidth(STACKED_VIEWS_FRAME))
+    {
+        [self _moveToState:_SNStackNavigationDragDirectionRight
+                    bounce:NO];
+    }
 
     for (UIViewController *viewController in _viewControllers)
     {
@@ -416,78 +403,6 @@ typedef enum
 }
 
 
-- (_SNStackNavigationStateType)_decideMainState
-{
-    if (!LEFT_VIEW)
-    {
-        return _SNStackNavigationStateNone;
-    }
-
-    if (!RIGHT_VIEW)
-    {
-        return _SNStackNavigationStateL;
-    }
-
-    if (!MORE_LEFT_VIEW && !MORE_RIGHT_VIEW)
-    {
-        return _SNStackNavigationStateLR;
-    }
-
-    if (!MORE_LEFT_VIEW)
-    {
-        return _SNStackNavigationStateLRMR;
-    }
-
-    if (!MORE_RIGHT_VIEW)
-    {
-        return _SNStackNavigationStateMLLR;
-    }
-
-    return _SNStackNavigationStateMLLRMR;
-}
-
-
-- (void)_moveToStateL:(_SNStackNavigationDragDirectionType)dragDirection
-               bounce:(BOOL)bounce
-{
-    void (^animationBlock)(void);
-    void (^completionBlock)(BOOL);
-
-    if (bounce)
-    {
-        int offsetDirection;
-
-        offsetDirection = dragDirection == _SNStackNavigationDragDirectionLeft ? 1 : -1;
-
-        animationBlock = ^(void)
-        {
-            LEFT_VIEW_SET_X(_tabEndX +  _SNStackNavigationMoveOffset * offsetDirection);
-        };
-
-        completionBlock = ^(BOOL finished)
-        {
-            void (^bounceBlock)(void);
-
-            bounceBlock = ^(void)
-            {
-                LEFT_VIEW_SET_X(_tabEndX);
-            };
-
-            DEFAULT_ANIMATION(bounceBlock, nil);
-        };
-    }
-    else
-    {
-        animationBlock = ^(void)
-        {
-            LEFT_VIEW_SET_X(_tabEndX);
-        };
-    }
-
-    DEFAULT_ANIMATION(animationBlock, completionBlock);
-}
-
-
 - (void)_cutDownViewControllersExceptRootViewController
 {
     if ([_delegate respondsToSelector:@selector(stackNavigationControllerWillCuttingDown:)])
@@ -522,545 +437,583 @@ typedef enum
 }
 
 
-- (void)_moveToStateLRWithRightDirectionWithBounce:(BOOL)bounce
-{
-    void (^animationBlock)(void);
-    void (^completionBlock)(BOOL);
-
-    if (CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
-    {
-        animationBlock = ^(void)
-        {
-            LEFT_VIEW_SET_X(0);
-            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-        };
-
-        if (bounce)
-        {
-            completionBlock = ^(BOOL finished)
-            {
-                void (^bounceAnimationBlock)(void);
-                void (^bounceCompletionBlock)(BOOL);
-
-                bounceAnimationBlock = ^(void)
-                {
-                    LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
-                    // -1 is so as not to appear background for an instant
-                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - 1);
-                };
-
-                bounceCompletionBlock = ^(BOOL finished)
-                {
-                    void (^bounceBackAnimation)(void);
-
-                    bounceBackAnimation = ^(void)
-                    {
-                        LEFT_VIEW_SET_X(0);
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                    };
-
-                    DEFAULT_ANIMATION(bounceBackAnimation, nil);
-                };
-
-                DEFAULT_ANIMATION(bounceAnimationBlock, bounceCompletionBlock);
-            };
-        }
-    }
-    else
-    {
-        if (bounce)
-        {
-            int offsetDirection;
-
-            offsetDirection = CGRectGetMinX(LEFT_VIEW_FRAME) < _tabEndX ? 1 : -1;
-
-            animationBlock = ^(void)
-            {
-                // TODO: 移動距離に応じて変化させる
-                LEFT_VIEW_SET_X(_tabEndX + _SNStackNavigationMoveOffset * offsetDirection);
-                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-            };
-
-            completionBlock = ^(BOOL finished)
-            {
-                void (^bounceBlock)(void);
-
-                bounceBlock = ^(void)
-                {
-                    LEFT_VIEW_SET_X(_tabEndX);
-                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                };
-
-                DEFAULT_ANIMATION(bounceBlock, nil);
-            };
-        }
-        else
-        {
-            animationBlock = ^(void)
-            {
-                // TODO: 移動距離に応じて変化させる
-                LEFT_VIEW_SET_X(_tabEndX);
-                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-            };
-        }
-
-        if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
-        {
-            [self _cutDownViewControllersExceptRootViewController];
-        }
-    }
-
-    DEFAULT_ANIMATION(animationBlock, completionBlock);
-}
-
-
-- (void)_moveToStateMLLRWithRightDirectionWithBounce:(BOOL)bounce
-{
-    void (^animationBlock)(void);
-    void (^completionBlock)(BOOL);
-
-    if (CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
-    {
-        CGFloat leftViewX;
-
-        leftViewX = 0;
-
-        animationBlock = ^(void)
-        {
-            LEFT_VIEW_SET_X(leftViewX);
-            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-        };
-
-        if (bounce)
-        {
-            completionBlock = ^(BOOL finished)
-            {
-                void (^bounceAnimationBlock)(void);
-                void (^bounceCompletionBlock)(BOOL);
-
-                bounceAnimationBlock = ^(void)
-                {
-                    LEFT_VIEW_SET_X(leftViewX + _SNStackNavigationMoveOffset);
-                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-                };
-
-                bounceCompletionBlock = ^(BOOL finished)
-                {
-                    void (^bounceBackAnimationBlock)(void);
-
-                    bounceBackAnimationBlock = ^(void)
-                    {
-                        LEFT_VIEW_SET_X(leftViewX);
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-                    };
-
-                    DEFAULT_ANIMATION(bounceBackAnimationBlock, nil);
-                };
-
-                DEFAULT_ANIMATION(bounceAnimationBlock, bounceCompletionBlock);
-            };
-        }
-    }
-    else
-    {
-        CGFloat leftViewX, moreLeftViewX;
-
-        leftViewX       = CGRectGetMaxX(MORE_LEFT_VIEW_FRAME);
-        moreLeftViewX   = 0;
-
-        animationBlock = ^(void)
-        {
-            LEFT_VIEW_SET_X(leftViewX);
-            // 第1引数を CGRectGetMaxX(STACKED_VIEWS_FRAME) とするときれいにアニメーションしない
-            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-        };
-
-        if (bounce)
-        {
-            completionBlock = ^(BOOL finished)
-            {
-                void (^bounceAnimationBlock)(void);
-                void (^bounceCompletionBlock)(BOOL);
-
-                bounceAnimationBlock = ^(void)
-                {
-                    MORE_LEFT_VIEW_SET_X(moreLeftViewX + _SNStackNavigationMoveOffset);
-                    LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
-                };
-
-                bounceCompletionBlock = ^(BOOL finished)
-                {
-                    void (^bounceBackAnimationBlock)(void);
-                    void (^bounceBackCompletionBlock)(BOOL);
-
-                    bounceBackAnimationBlock = ^(void)
-                    {
-                        LEFT_VIEW_SET_X(leftViewX);
-                        MORE_LEFT_VIEW_SET_X(moreLeftViewX);
-                    };
-
-                    bounceBackCompletionBlock = ^(BOOL finished)
-                    {
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX([STACKED_VIEWS bounds]));
-
-                        [CONTENT_VIEW setMoreRightView:RIGHT_VIEW];
-                        [CONTENT_VIEW setRightView:LEFT_VIEW];
-                        [CONTENT_VIEW setLeftView:MORE_LEFT_VIEW];
-
-                        if (IS_VIEW_ROOT_VIEW(MORE_LEFT_VIEW))
-                        {
-                            [CONTENT_VIEW setMoreLeftView:nil];
-                        }
-                        else
-                        {
-                            [CONTENT_VIEW setMoreLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_LEFT_VIEW] - 1]];
-                        }
-                    };
-
-                    DEFAULT_ANIMATION(bounceBackAnimationBlock, bounceBackCompletionBlock);
-                };
-
-                DEFAULT_ANIMATION(bounceAnimationBlock, bounceCompletionBlock);
-            };
-        }
-    }
-
-    DEFAULT_ANIMATION(animationBlock, completionBlock);
-}
-
-
-- (void)_moveToStateMLLRMRWithLeftDirectionWithBounce:(BOOL)bounce
-{
-    void (^animationBlock)(void);
-    void (^completionBlock)(BOOL);
-
-    if (CGRectGetMinX(RIGHT_VIEW_FRAME) < (CGRectGetWidth(STACKED_VIEWS_FRAME) - CGRectGetWidth(RIGHT_VIEW_FRAME)))
-    {
-        CGFloat moreRightViewX;
-
-        moreRightViewX = CGRectGetWidth(STACKED_VIEWS_FRAME) - CGRectGetWidth(MORE_RIGHT_VIEW_FRAME);
-
-        animationBlock = ^(void)
-        {
-            LEFT_VIEW_SET_X(0);
-            RIGHT_VIEW_SET_X(0);
-            MORE_RIGHT_VIEW_SET_X(moreRightViewX);
-        };
-
-        if (bounce)
-        {
-            completionBlock = ^(BOOL finished)
-            {
-                void (^bounceAnimationBlock)(void);
-                void (^bounceAnimationCompletionBlock)(BOOL);
-
-                [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
-                [CONTENT_VIEW setLeftView:RIGHT_VIEW];
-                [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
-
-                if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
-                {
-                    [CONTENT_VIEW setMoreRightView:nil];
-                }
-                else
-                {
-                    [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
-                }
-
-                bounceAnimationBlock = ^(void)
-                {
-                    RIGHT_VIEW_SET_X(moreRightViewX - _SNStackNavigationMoveOffset);
-                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-                };
-
-                bounceAnimationCompletionBlock = ^(BOOL finished)
-                {
-                    void (^bounceBackAnimationBlock)(void);
-
-                    bounceBackAnimationBlock = ^(void)
-                    {
-                        RIGHT_VIEW_SET_X(moreRightViewX);
-                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-                    };
-
-                    DEFAULT_ANIMATION(bounceBackAnimationBlock, nil);
-                };
-
-                DEFAULT_ANIMATION(bounceAnimationBlock, bounceAnimationCompletionBlock);
-            };
-        }
-    }
-    else
-    {
-        CGFloat rightViewX;
-
-        rightViewX = CGRectGetWidth(STACKED_VIEWS_FRAME) - CGRectGetWidth(RIGHT_VIEW_FRAME);
-
-        if (bounce)
-        {
-            animationBlock = ^(void)
-            {
-                LEFT_VIEW_SET_X(0);
-                RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
-                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-            };
-
-            completionBlock = ^(BOOL finished)
-            {
-                void (^bounceBackAnimationBlock)(void);
-
-                bounceBackAnimationBlock = ^(void)
-                {
-                    LEFT_VIEW_SET_X(0);
-                    RIGHT_VIEW_SET_X(rightViewX);
-                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-                };
-
-                DEFAULT_ANIMATION(bounceBackAnimationBlock, nil);
-            };
-        }
-        else
-        {
-            animationBlock = ^(void)
-            {
-                LEFT_VIEW_SET_X(0);
-                RIGHT_VIEW_SET_X(rightViewX);
-                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
-            };
-        }
-    }
-
-    DEFAULT_ANIMATION(animationBlock, completionBlock);
-}
-
-
 - (void)_moveToState:(_SNStackNavigationDragDirectionType)dragDirection
               bounce:(BOOL)bounce
 {
     void (^animationBlock)(void);
     void (^completionBlock)(BOOL);
 
-    switch ([self _decideMainState])
+    if (!MORE_LEFT_VIEW)
     {
-        case _SNStackNavigationStateL:
+        if (RIGHT_VIEW)
         {
-            [self _moveToStateL:dragDirection
-                         bounce:bounce];
-            break;
-        }
-
-        case _SNStackNavigationStateLR:
-        {
-            if (dragDirection == _SNStackNavigationDragDirectionLeft)
+            if (CGRectGetMinX(LEFT_VIEW_FRAME) <= 0)
             {
-                if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX)
+                if (MORE_RIGHT_VIEW &&
+                    CGRectGetMinX(RIGHT_VIEW_FRAME) < RIGHT_VIEW_FOLDED_X)
                 {
-                    animationBlock = ^(void)
+                    switch (dragDirection)
                     {
-                        LEFT_VIEW_SET_X(_tabEndX);
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                    };
-                }
-                else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
-                {
-                    CGFloat rightViewX;
-
-                    rightViewX = CGRectGetWidth(STACKED_VIEWS_FRAME) - CGRectGetWidth(RIGHT_VIEW_FRAME);
-
-                    if (bounce)
-                    {
-                        animationBlock = ^(void)
+                        case _SNStackNavigationDragDirectionLeft:
                         {
-                            LEFT_VIEW_SET_X(0);
-                            RIGHT_VIEW_SET_X(rightViewX - _SNStackNavigationMoveOffset);
-                        };
+                            [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
+                            [CONTENT_VIEW setLeftView:RIGHT_VIEW];
+                            [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
 
-                        completionBlock = ^(BOOL finished)
-                        {
-                            void (^bounceBlock)(void);
-
-                            bounceBlock = ^(void)
+                            if ([STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] == [STACKED_VIEWS_CONCRETE count] - 1)
                             {
-                                RIGHT_VIEW_SET_X(rightViewX);
+                                [CONTENT_VIEW setMoreRightView:nil];
+                            }
+                            else
+                            {
+                                [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
+                            }
+
+                            animationBlock = ^(void)
+                            {
+                                LEFT_VIEW_SET_X(0);
+                                RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                             };
 
-                            DEFAULT_ANIMATION(bounceBlock, nil);
-                        };
-                    }
-                    else
-                    {
-                        animationBlock = ^(void)
-                        {
-                            LEFT_VIEW_SET_X(0);
-                            RIGHT_VIEW_SET_X(rightViewX);
-                        };
-                    }
-                }
-                else
-                {
-                    animationBlock = ^(void)
-                    {
-                        LEFT_VIEW_SET_X(0);
-                        RIGHT_VIEW_SET_X(CGRectGetWidth(LEFT_VIEW_FRAME));
-                    };
-                }
-            }
-            else if (dragDirection == _SNStackNavigationDragDirectionRight)
-            {
-                [self _moveToStateLRWithRightDirectionWithBounce:bounce];
-            }
-
-            break;
-        }
-
-        case _SNStackNavigationStateLRMR:
-        {
-            if (dragDirection == _SNStackNavigationDragDirectionLeft)
-            {
-                if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX)
-                {
-                    animationBlock = ^(void)
-                    {
-                        LEFT_VIEW_SET_X(_tabEndX);
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                    };
-                }
-                else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
-                {
-                    [self _moveToStateMLLRMRWithLeftDirectionWithBounce:bounce];
-                }
-                else
-                {
-                    animationBlock = ^(void)
-                    {
-                        LEFT_VIEW_SET_X(0);
-                        RIGHT_VIEW_SET_X(CGRectGetWidth(LEFT_VIEW_FRAME));
-                    };
-                }
-            }
-            else if (dragDirection == _SNStackNavigationDragDirectionRight)
-            {
-                [self _moveToStateLRWithRightDirectionWithBounce:bounce];
-            }
-
-            break;
-        }
-
-        case _SNStackNavigationStateMLLR:
-        {
-            if (dragDirection == _SNStackNavigationDragDirectionLeft)
-            {
-                if (CGRectGetMinX(LEFT_VIEW_FRAME) <= _tabEndX)
-                {
-                    CGFloat rightViewX;
-                    int     offsetDirection;
-
-                    rightViewX      = CGRectGetWidth(STACKED_VIEWS_FRAME) - CGRectGetWidth(RIGHT_VIEW_FRAME);
-                    offsetDirection = CGRectGetMinX(RIGHT_VIEW_FRAME) < rightViewX ? 1 : -1;
-
-                    animationBlock = ^(void)
-                    {
-                        LEFT_VIEW_SET_X(0);
-                        RIGHT_VIEW_SET_X(rightViewX);
-                    };
-
-                    if (bounce)
-                    {
-                        completionBlock = ^(BOOL finished)
-                        {
-                            void (^bounceBlock)(void);
-                            void (^bounceCompletionBlock)(BOOL);
-
-                            bounceBlock = ^(void)
+                            if (bounce)
                             {
-                                LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset * offsetDirection);
-                                RIGHT_VIEW_SET_X(rightViewX + _SNStackNavigationMoveOffset * offsetDirection);
-                            };
+                                completionBlock = ^(BOOL finished)
+                                {
+                                    void (^bounceBlock)(void) = ^(void)
+                                    {
+                                        LEFT_VIEW_SET_X(0);
+                                        RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X - _SNStackNavigationMoveOffset);
+                                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                    };
 
-                            bounceCompletionBlock = ^(BOOL finished)
+                                    void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                                    {
+                                        void (^bounceBackBlock)(void) = ^(void)
+                                        {
+                                            LEFT_VIEW_SET_X(0);
+                                            RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                        };
+
+                                        DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                                };
+                            }
+
+                            break;
+                        }
+
+                        case _SNStackNavigationDragDirectionRight:
+                        {
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+                }
+                else if (CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
+                {
+                    switch (dragDirection)
+                    {
+                        case _SNStackNavigationDragDirectionLeft:
+                        {
+                            if (bounce)
                             {
-                                void (^bounceBackAnimation)(void);
-
-                                bounceBackAnimation = ^(void)
+                                animationBlock = ^(void)
                                 {
                                     LEFT_VIEW_SET_X(0);
-                                    RIGHT_VIEW_SET_X(rightViewX);
+                                    RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X - _SNStackNavigationMoveOffset);
+                                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                 };
 
-                                DEFAULT_ANIMATION(bounceBackAnimation, nil);
+                                completionBlock = ^(BOOL finished)
+                                {
+                                    void (^bounceBackBlock)(void) = ^(void)
+                                    {
+                                        LEFT_VIEW_SET_X(0);
+                                        RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                };
+                            }
+                            else
+                            {
+                                animationBlock = ^(void)
+                                {
+                                    LEFT_VIEW_SET_X(0);
+                                    RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                };
+                            }
+
+                            break;
+                        }
+
+                        case _SNStackNavigationDragDirectionRight:
+                        {
+                            animationBlock = ^(void)
+                            {
+                                LEFT_VIEW_SET_X(0);
+                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                             };
 
-                            DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
-                        };
+                            if (bounce)
+                            {
+                                completionBlock = ^(BOOL finished)
+                                {
+                                    void (^bounceBlock)(void) = ^(void)
+                                    {
+                                        LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                    };
+
+                                    void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                                    {
+                                        void (^bounceBackBlock)(void) = ^(void)
+                                        {
+                                            LEFT_VIEW_SET_X(0);
+                                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                        };
+
+                                        DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                                };
+                            }
+
+                            break;
+                        }
+
+                        default:
+                            break;
                     }
                 }
-                else
+            }
+            else if (CGRectGetMinX(LEFT_VIEW_FRAME) < _tabEndX)
+            {
+                switch (dragDirection)
                 {
-                    if (bounce)
-                    {
-                        animationBlock = ^(void)
-                        {
-                            LEFT_VIEW_SET_X(0);
-                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - _SNStackNavigationMoveOffset);
-                        };
-
-                        completionBlock = ^(BOOL finished)
-                        {
-                            void (^bounceBlock)(void);
-
-                            bounceBlock = ^(void)
-                            {
-                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                            };
-
-                            DEFAULT_ANIMATION(bounceBlock, nil);
-                        };
-                    }
-                    else
+                    case _SNStackNavigationDragDirectionLeft:
                     {
                         animationBlock = ^(void)
                         {
                             LEFT_VIEW_SET_X(0);
                             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         };
+
+                        if (bounce)
+                        {
+                            completionBlock = ^(BOOL finished)
+                            {
+                                void (^bounceBlock)(void) = ^(void)
+                                {
+                                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - _SNStackNavigationMoveOffset);
+                                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                };
+
+                                void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                                {
+                                    void (^bounceBackBlock)(void) = ^(void)
+                                    {
+                                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                };
+
+                                DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                            };
+                        }
+
+                        break;
                     }
+
+                    case _SNStackNavigationDragDirectionRight:
+                    {
+                        if (bounce)
+                        {
+                            animationBlock = ^(void)
+                            {
+                                LEFT_VIEW_SET_X(_tabEndX + _SNStackNavigationMoveOffset);
+                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            };
+
+                            completionBlock = ^(BOOL finished)
+                            {
+                                void (^bounceBlock)(void) = ^(void)
+                                {
+                                    LEFT_VIEW_SET_X(_tabEndX);
+                                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                };
+
+                                DEFAULT_ANIMATION(bounceBlock, nil);
+                            };
+                        }
+                        else
+                        {
+                            animationBlock = ^(void)
+                            {
+                                LEFT_VIEW_SET_X(_tabEndX);
+                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            };
+                        }
+
+                        break;
+                    }
+
+                    default:
+                        break;
                 }
             }
-            else if (dragDirection == _SNStackNavigationDragDirectionRight)
+            else
             {
-                [self _moveToStateMLLRWithRightDirectionWithBounce:bounce];
-            }
+                if (bounce)
+                {
+                    animationBlock = ^(void)
+                    {
+                        LEFT_VIEW_SET_X(_tabEndX - _SNStackNavigationMoveOffset);
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                    };
 
-            break;
+                    completionBlock = ^(BOOL finished)
+                    {
+                        void (^bounceBlock)(void) = ^(void)
+                        {
+                            LEFT_VIEW_SET_X(_tabEndX);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        };
+
+                        DEFAULT_ANIMATION(bounceBlock, nil);
+                    };
+                }
+                else
+                {
+                    animationBlock = ^(void)
+                    {
+                        LEFT_VIEW_SET_X(_tabEndX);
+                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                    };
+                }
+
+                if (CGRectGetMinX(LEFT_VIEW_FRAME) > _tabEndX + _SNStackNavigationCutDownWidth)
+                {
+                    [self _cutDownViewControllersExceptRootViewController];
+                }
+            }
         }
-
-        case _SNStackNavigationStateMLLRMR:
+        else
         {
-            if (dragDirection == _SNStackNavigationDragDirectionLeft)
+            if (bounce)
             {
-                [self _moveToStateMLLRMRWithLeftDirectionWithBounce:bounce];
-            }
-            else if (dragDirection == _SNStackNavigationDragDirectionRight)
-            {
-                [self _moveToStateMLLRWithRightDirectionWithBounce:bounce];
-            }
+                int offsetDirection;
 
-            break;
+                offsetDirection = CGRectGetMinX(LEFT_VIEW_FRAME) < _tabEndX ? 1 : -1;
+
+                animationBlock = ^(void)
+                {
+                    LEFT_VIEW_SET_X(_tabEndX + offsetDirection * _SNStackNavigationMoveOffset);
+                };
+
+                completionBlock = ^(BOOL finished)
+                {
+                    void (^bounceBackBlock)(void) = ^(void)
+                    {
+                        LEFT_VIEW_SET_X(_tabEndX);
+                    };
+
+                    DEFAULT_ANIMATION(bounceBackBlock, nil);
+                };
+            }
+            else
+            {
+                animationBlock = ^(void)
+                {
+                    LEFT_VIEW_SET_X(_tabEndX);
+                };
+
+                DEFAULT_ANIMATION(animationBlock, nil);
+            }
         }
-
-        default:
+    }
+    else
+    {
+        if (RIGHT_VIEW_FOLDED_X <= CGRectGetMinX(RIGHT_VIEW_FRAME))
         {
-            NSException *exception;
+            switch (dragDirection)
+            {
+                case _SNStackNavigationDragDirectionLeft:
+                {
+                    animationBlock = ^(void)
+                    {
+                        RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X - _SNStackNavigationMoveOffset);
+                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                    };
 
-            exception = [NSException exceptionWithName:@"UnknownStateException"
-                                                reason:@"State is unknown"
-                                              userInfo:nil];
-            @throw exception;
+                    completionBlock = ^(BOOL finished)
+                    {
+                        void (^bounceBlock)(void) = ^(void)
+                        {
+                            RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                        };
 
-            break;
+                        DEFAULT_ANIMATION(bounceBlock, nil);
+                    };
+
+                    break;
+                }
+
+                case _SNStackNavigationDragDirectionRight:
+                {
+                    if (CGRectGetMinX(LEFT_VIEW_FRAME) > 0)
+                    {
+                        animationBlock = ^(void)
+                        {
+                            LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        };
+
+                        void (^exchangeBlock)(BOOL) = ^(BOOL finished)
+                        {
+                            [CONTENT_VIEW setMoreRightView:RIGHT_VIEW];
+                            [CONTENT_VIEW setRightView:LEFT_VIEW];
+                            [CONTENT_VIEW setLeftView:MORE_LEFT_VIEW];
+
+                            if (IS_VIEW_ROOT_VIEW(MORE_LEFT_VIEW))
+                            {
+                                [CONTENT_VIEW setMoreLeftView:nil];
+                            }
+                            else
+                            {
+                                [CONTENT_VIEW setMoreLeftView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_LEFT_VIEW] - 1]];
+                            }
+                        };
+
+                        if (bounce)
+                        {
+                            completionBlock = ^(BOOL finished)
+                            {
+                                void (^bounceBlock)(void) = ^(void)
+                                {
+                                    MORE_LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                                    LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                };
+
+                                void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                                {
+                                    void (^bounceBackBlock)(void) = ^(void)
+                                    {
+                                        MORE_LEFT_VIEW_SET_X(0);
+                                        LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBackBlock, exchangeBlock);
+                                };
+
+                                DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                            };
+                        }
+                        else
+                        {
+                            completionBlock = exchangeBlock;
+                        }
+                    }
+                    else
+                    {
+                        animationBlock = ^(void)
+                        {
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        };
+
+                        if (bounce)
+                        {
+                            completionBlock = ^(BOOL finished)
+                            {
+                                void (^bounceBlock)(void) = ^(void)
+                                {
+                                    LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                };
+
+                                void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                                {
+                                    void (^bounceBackBlock)(void) = ^(void)
+                                    {
+                                        LEFT_VIEW_SET_X(0);
+                                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                };
+
+                                DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                            };
+                        }
+                    }
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+        else if (CGRectGetMinX(RIGHT_VIEW_FRAME) < RIGHT_VIEW_FOLDED_X)
+        {
+            if (MORE_RIGHT_VIEW)
+            {
+                switch (dragDirection)
+                {
+                    case _SNStackNavigationDragDirectionLeft:
+                    {
+                        [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
+                        [CONTENT_VIEW setLeftView:RIGHT_VIEW];
+                        [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
+
+                        if ([STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] == [STACKED_VIEWS_CONCRETE count] - 1)
+                        {
+                            [CONTENT_VIEW setMoreRightView:nil];
+                        }
+                        else
+                        {
+                            [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
+                        }
+
+                        animationBlock = ^(void)
+                        {
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                        };
+
+                        if (bounce)
+                        {
+                            completionBlock = ^(BOOL finished)
+                            {
+                                void (^bounceBlock)(void) = ^(void)
+                                {
+                                    LEFT_VIEW_SET_X(0);
+                                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME) - _SNStackNavigationMoveOffset);
+                                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                };
+
+                                void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                                {
+                                    void (^bounceBackBlock)(void) = ^(void)
+                                    {
+                                        LEFT_VIEW_SET_X(0);
+                                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                };
+
+                                DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                            };
+                        }
+
+                        break;
+                    }
+
+                    case _SNStackNavigationDragDirectionRight:
+                    {
+                        animationBlock = ^(void)
+                        {
+                            LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                        };
+
+                        if (bounce)
+                        {
+                            completionBlock = ^(BOOL finished)
+                            {
+                                void (^bounceBlock)(void) = ^(void)
+                                {
+                                    MORE_LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                                    LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                                    RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                };
+
+                                void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                                {
+                                    void (^bounceBackBlock)(void) = ^(void)
+                                    {
+                                        MORE_LEFT_VIEW_SET_X(0);
+                                        LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                    };
+
+                                    DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                };
+
+                                DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                            };
+                        }
+
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                animationBlock = ^(void)
+                {
+                    RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                };
+
+                if (bounce)
+                {
+                    completionBlock = ^(BOOL finished)
+                    {
+                        BOOL bounceLeftView;
+
+                        bounceLeftView = CGRectGetMaxX(LEFT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X;
+
+                        void (^bounceBlock)(void) = ^(void)
+                        {
+                            RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X + _SNStackNavigationMoveOffset);
+                            if (bounceLeftView)
+                            {
+                                LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                            }
+                        };
+
+                        void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
+                        {
+                            void (^bounceBackBlock)(void) = ^(void)
+                            {
+                                RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
+                                if (bounceLeftView)
+                                {
+                                    LEFT_VIEW_SET_X(0);
+                                }
+                            };
+
+                            DEFAULT_ANIMATION(bounceBackBlock, nil);
+                        };
+
+                        DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                    };
+                }
+            }
         }
     }
 
@@ -1160,27 +1113,47 @@ typedef enum
                     }
                     else if (MORE_RIGHT_VIEW)
                     {
-                        LEFT_VIEW_SET_X(0);
+                        CGFloat rightViewX;
 
-                        [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
-                        [CONTENT_VIEW setLeftView:RIGHT_VIEW];
-                        [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
+                        rightViewX = floorf(startPointOfRightView + translation - lastTranslation);
 
-                        if (MORE_RIGHT_VIEW)
+                        if (rightViewX > 0)
                         {
-                            if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
-                            {
-                                [CONTENT_VIEW setMoreRightView:nil];
-                            }
-                            else
-                            {
-                                [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
-                            }
+                            RIGHT_VIEW_SET_X(rightViewX);
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         }
+                        else
+                        {
+                            RIGHT_VIEW_SET_X(0);
 
-                        startPointOfLeftView    = LEFT_VIEW_FRAME.origin.x;
-                        startPointOfRightView   = RIGHT_VIEW_FRAME.origin.x;
-                        lastTranslation         = translation;
+                            [CONTENT_VIEW setMoreLeftView:LEFT_VIEW];
+                            [CONTENT_VIEW setLeftView:RIGHT_VIEW];
+                            [CONTENT_VIEW setRightView:MORE_RIGHT_VIEW];
+
+                            if (MORE_RIGHT_VIEW)
+                            {
+                                if ([STACKED_VIEWS_CONCRETE lastObject] == MORE_RIGHT_VIEW)
+                                {
+                                    [CONTENT_VIEW setMoreRightView:nil];
+                                }
+                                else
+                                {
+                                    [CONTENT_VIEW setMoreRightView:[STACKED_VIEWS_CONCRETE objectAtIndex:[STACKED_VIEWS_CONCRETE indexOfObject:MORE_RIGHT_VIEW] + 1]];
+                                }
+                            }
+
+                            startPointOfLeftView    = LEFT_VIEW_FRAME.origin.x;
+                            startPointOfRightView   = RIGHT_VIEW_FRAME.origin.x;
+                            lastTranslation         = translation;
+                        }
+                    }
+                    else if (RIGHT_VIEW_FOLDED_X <= CGRectGetMinX(RIGHT_VIEW_FRAME))
+                    {
+                        CGFloat rightViewX;
+
+                        rightViewX = floorf(startPointOfRightView + (translation - lastTranslation));
+
+                        RIGHT_VIEW_SET_X(rightViewX);
                     }
                     else
                     {
@@ -1237,18 +1210,26 @@ typedef enum
                     }
                     else if (!MORE_LEFT_VIEW)
                     {
-                        CGFloat leftViewX;
-
-                        leftViewX = floorf(startPointOfLeftView + translation - lastTranslation);
-                        if (leftViewX > _tabEndX)
+                        if (CGRectGetMinX(RIGHT_VIEW_FRAME) < CGRectGetMaxX(LEFT_VIEW_FRAME))
                         {
-                            startPointOfLeftView    = _tabEndX;
-                            lastTranslation         = translation - (leftViewX - _tabEndX);
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(startPointOfRightView + translation - lastTranslation);
                         }
+                        else
+                        {
+                            CGFloat leftViewX;
 
-                        LEFT_VIEW_SET_X(leftViewX);
-                        RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
-                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                            leftViewX = floorf(startPointOfLeftView + translation - lastTranslation);
+                            if (leftViewX > _tabEndX)
+                            {
+                                startPointOfLeftView    = _tabEndX;
+                                lastTranslation         = translation - (leftViewX - _tabEndX);
+                            }
+
+                            LEFT_VIEW_SET_X(leftViewX);
+                            RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                        }
                     }
                     else if (CGRectGetMinX(LEFT_VIEW_FRAME) <= CGRectGetMaxX(MORE_LEFT_VIEW_FRAME))
                     {
