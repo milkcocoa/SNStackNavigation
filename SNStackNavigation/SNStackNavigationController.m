@@ -538,7 +538,7 @@ typedef enum
 
                                     void (^bounceBlock)(void) = ^(void)
                                     {
-                                        RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X - _SNStackNavigationMoveOffset);
+                                        RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X + _SNStackNavigationMoveOffset);
                                         MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
 
                                         if (bounceLeftView)
@@ -1229,6 +1229,7 @@ typedef enum
                         {
                             LEFT_VIEW_SET_X(0);
                             RIGHT_VIEW_SET_X(startPointOfRightView + translation - lastTranslation);
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         }
                         else
                         {
@@ -1273,10 +1274,16 @@ typedef enum
 
                             MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         }
-                        else
+                        else if (leftViewX > 0)
                         {
                             LEFT_VIEW_SET_X(leftViewX);
                             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
+                        }
+                        else
+                        {
+                            LEFT_VIEW_SET_X(0);
+                            RIGHT_VIEW_SET_X(startPointOfRightView + translation - lastTranslation);
                             MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         }
                     }
