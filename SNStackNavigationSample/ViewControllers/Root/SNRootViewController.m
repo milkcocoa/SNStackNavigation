@@ -135,4 +135,12 @@
 }
 
 
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                         duration:(NSTimeInterval)duration
+{
+    [_homeViewController willAnimateRotationToInterfaceOrientation:toInterfaceOrientation
+                                                          duration:duration];
+}
+
+
 @end

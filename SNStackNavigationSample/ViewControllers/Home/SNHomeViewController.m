@@ -229,6 +229,14 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 }
 
 
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                         duration:(NSTimeInterval)duration
+{
+    [_navigationController willAnimateRotationToInterfaceOrientation:toInterfaceOrientation
+                                                            duration:duration];
+}
+
+
 - (void)showTab1ViewController
 {
     BOOL animated;
