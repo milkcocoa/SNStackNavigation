@@ -127,29 +127,7 @@
 
 - (void)layoutSubviews
 {
-    CGFloat height;
-
-    height = CGRectGetHeight([self bounds]);
-    if (height < CGRectGetHeight([_stackedViews frame]))
-    {
-        // workaround: not to show background, when the rotation (portrait to landscape) occurs
-        [CATransaction begin];
-        [CATransaction setAnimationDuration:.8];
-        [_leftMaskLayer setPosition:CGPointMake(0, 0)];
-        [_leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_leftMaskLayer frame]), height)];
-        [_rightMaskLayer setPosition:CGPointMake(-(_shadowWidth + SNStackNavigationCornerRadius), 0)];
-        [_rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_rightMaskLayer frame]), height)];
-        [CATransaction commit];
-    }
-    else
-    {
-        [_leftMaskLayer setPosition:CGPointMake(0, 0)];
-        [_leftMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_leftMaskLayer frame]), height)];
-        [_rightMaskLayer setPosition:CGPointMake(-(_shadowWidth + SNStackNavigationCornerRadius), 0)];
-        [_rightMaskLayer setBounds:CGRectMake(0, 0, CGRectGetWidth([_rightMaskLayer frame]), height)];
-    }
-
-    [_stackedViews setFrame:CGRectMake(_minimumTabWidth, 0, CGRectGetWidth([self bounds]) - _minimumTabWidth, height)];
+    [_stackedViews setFrame:CGRectMake(_minimumTabWidth, 0, CGRectGetWidth([self bounds]) - _minimumTabWidth, CGRectGetHeight([self bounds]))];
 }
 
 

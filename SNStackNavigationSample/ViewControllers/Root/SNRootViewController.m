@@ -135,11 +135,25 @@
 }
 
 
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                duration:(NSTimeInterval)duration
+{
+    [_homeViewController willRotateToInterfaceOrientation:toInterfaceOrientation
+                                                 duration:duration];
+}
+
+
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration
 {
     [_homeViewController willAnimateRotationToInterfaceOrientation:toInterfaceOrientation
                                                           duration:duration];
+}
+
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    [_homeViewController didRotateFromInterfaceOrientation:fromInterfaceOrientation];
 }
 
 

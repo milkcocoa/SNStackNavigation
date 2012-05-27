@@ -286,50 +286,31 @@ typedef enum
 }
 
 
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                duration:(NSTimeInterval)duration
+{
+    [CATransaction begin];
+    [CATransaction setValue:(id)kCFBooleanTrue
+                     forKey:kCATransactionDisableActions];
+
+    [[CONTENT_VIEW leftMaskLayer] removeFromSuperlayer];
+    [[CONTENT_VIEW rightMaskLayer] removeFromSuperlayer];
+
+    [CATransaction commit];
+}
+
+
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration
 {
     for (UIViewController *viewController in _viewControllers)
     {
-        if ([viewController view] == LEFT_VIEW)
-        {
-            CGFloat             viewWidth;
-            CGRect              frame;
+        CGRect frame;
 
-            viewWidth = [viewController contentWidthForViewInStackNavigation];
+        frame = [[viewController view] frame];
+        frame.size.width = [viewController contentWidthForViewInStackNavigation];
 
-            frame = CGRectMake(0,
-                               0,
-                               viewWidth,
-                               CGRectGetHeight([[self view] bounds]));
-
-            if (RIGHT_VIEW)
-            {
-                frame.origin.x = CGRectGetMinX([LEFT_VIEW frame]);
-            }
-            else
-            {
-                switch ([viewController insertedPosition])
-                {
-                    case SNStackNavigationInsertPositionDefault:
-                    {
-                        frame.origin.x = _tabEndX;
-                        break;
-                    }
-
-                    case SNStackNavigationInsertPositionUnFolded:
-                    {
-                        frame.origin.x = CGRectGetWidth([STACKED_VIEWS frame]) - viewWidth;
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-            }
-
-            [LEFT_VIEW setFrame:frame];
-        }
+        [[viewController view] setFrame:frame];
     }
 
     if (CGRectGetMaxX(RIGHT_VIEW_FRAME) < CGRectGetWidth(STACKED_VIEWS_FRAME))
@@ -352,6 +333,8 @@ typedef enum
     {
         [viewController didRotateFromInterfaceOrientation:fromInterfaceOrientation];
     }
+
+    [self _updateCornerRadius];
 }
 
 
@@ -1543,6 +1526,10 @@ typedef enum
 {
     NSUInteger viewsCount;
 
+    [CATransaction begin];
+    [CATransaction setValue:(id)kCFBooleanTrue
+                     forKey:kCATransactionDisableActions];
+
     // the specification of removeFromSuperlayer is that Removes the receiver from the sublayers array or mask property of the receiver’s superlayer.
     [[CONTENT_VIEW leftMaskLayer] removeFromSuperlayer];
     [[CONTENT_VIEW rightMaskLayer] removeFromSuperlayer];
@@ -1585,6 +1572,8 @@ typedef enum
 
         [[[mostRightViewController view] layer] setMask:[CONTENT_VIEW rightMaskLayer]];
     }
+
+    [CATransaction commit];
 }
 
 

@@ -229,11 +229,25 @@ static CGFloat  _SNHomeViewControllerTabWidth   = 292;
 }
 
 
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                duration:(NSTimeInterval)duration
+{
+    [_navigationController willRotateToInterfaceOrientation:toInterfaceOrientation
+                                                   duration:duration];
+}
+
+
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration
 {
     [_navigationController willAnimateRotationToInterfaceOrientation:toInterfaceOrientation
                                                             duration:duration];
+}
+
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    [_navigationController didRotateFromInterfaceOrientation:fromInterfaceOrientation];
 }
 
 
