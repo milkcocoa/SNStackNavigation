@@ -632,6 +632,7 @@ typedef enum
                         {
                             LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
                             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         };
 
                         if (bounce)
@@ -643,6 +644,7 @@ typedef enum
                                     MORE_LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
                                     LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
                                     RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                 };
 
                                 void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
@@ -652,6 +654,7 @@ typedef enum
                                         MORE_LEFT_VIEW_SET_X(0);
                                         LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
                                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                        MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                     };
 
                                     DEFAULT_ANIMATION(bounceBackBlock, nil);
@@ -778,6 +781,48 @@ typedef enum
 
                             case _SNStackNavigationDragDirectionRight:
                             {
+                                BOOL bounceLeftView;
+
+                                bounceLeftView = CGRectGetMaxX(LEFT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X;
+
+                                animationBlock = ^(void)
+                                {
+                                    LEFT_VIEW_SET_X(0);
+                                    RIGHT_VIEW_SET_X(bounceLeftView ? RIGHT_VIEW_FOLDED_X : CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                };
+
+                                if (bounce)
+                                {
+                                    completionBlock = ^(BOOL finished)
+                                    {
+                                        void (^bounceBlock)(void) = ^(void)
+                                        {
+                                            if (bounceLeftView)
+                                            {
+                                                LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                            }
+                                            else
+                                            {
+                                                RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X + _SNStackNavigationMoveOffset);
+                                            }
+                                        };
+
+                                        void (^completionBlock)(BOOL) = ^(BOOL finished)
+                                        {
+                                            void (^bounceBackBlock)(void) = ^(void)
+                                            {
+                                                LEFT_VIEW_SET_X(0);
+                                                RIGHT_VIEW_SET_X(bounceLeftView ? RIGHT_VIEW_FOLDED_X : CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                            };
+
+                                            DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                        };
+
+                                        DEFAULT_ANIMATION(bounceBlock, completionBlock);
+                                    };
+                                }
+
                                 break;
                             }
 
@@ -795,7 +840,6 @@ typedef enum
                                 {
                                     LEFT_VIEW_SET_X(0);
                                     RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
-                                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                 };
 
                                 if (bounce)
@@ -814,7 +858,6 @@ typedef enum
                                             }
 
                                             RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X + _SNStackNavigationMoveOffset);
-                                            MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                         };
 
                                         void (^bounceCompletionBlock)(BOOL) = ^(BOOL finished)
@@ -822,7 +865,6 @@ typedef enum
                                             void (^bounceBackBlock)(void) = ^(void)
                                             {
                                                 RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X);
-                                                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
 
                                                 if (bounceLeftView)
                                                 {
@@ -834,6 +876,53 @@ typedef enum
                                         };
 
                                         DEFAULT_ANIMATION(bounceBlock, bounceCompletionBlock);
+                                    };
+                                }
+
+                                break;
+                            }
+
+                            case _SNStackNavigationDragDirectionRight:
+                            {
+                                BOOL bounceLeftView;
+
+                                bounceLeftView = CGRectGetMaxX(LEFT_VIEW_FRAME) <= RIGHT_VIEW_FOLDED_X;
+
+                                animationBlock = ^(void)
+                                {
+                                    LEFT_VIEW_SET_X(0);
+                                    RIGHT_VIEW_SET_X(bounceLeftView ? RIGHT_VIEW_FOLDED_X : CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                };
+
+                                if (bounce)
+                                {
+                                    completionBlock = ^(BOOL finished)
+                                    {
+                                        void (^bounceBlock)(void) = ^(void)
+                                        {
+                                            if (bounceLeftView)
+                                            {
+                                                LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
+                                                RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                            }
+                                            else
+                                            {
+                                                RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X + _SNStackNavigationMoveOffset);
+                                            }
+                                        };
+
+                                        void (^completionBlock)(BOOL) = ^(BOOL finished)
+                                        {
+                                            void (^bounceBackBlock)(void) = ^(void)
+                                            {
+                                                LEFT_VIEW_SET_X(0);
+                                                RIGHT_VIEW_SET_X(bounceLeftView ? RIGHT_VIEW_FOLDED_X : CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                            };
+
+                                            DEFAULT_ANIMATION(bounceBackBlock, nil);
+                                        };
+
+                                        DEFAULT_ANIMATION(bounceBlock, completionBlock);
                                     };
                                 }
 
