@@ -58,29 +58,7 @@
     {
         _minimumTabWidth = minimumTabWidth;
 
-        [self setNeedsLayout];
-    }
-}
-
-
-- (void)setShadowWidth:(CGFloat)shadowWidth
-{
-    if (_shadowWidth != shadowWidth)
-    {
-        _shadowWidth = shadowWidth;
-
-        [self setNeedsLayout];
-    }
-}
-
-
-- (void)setTabWidth:(CGFloat)tabWidth
-{
-    if (_tabWidth != tabWidth)
-    {
-        _tabWidth = tabWidth;
-
-        [self setNeedsLayout];
+        [_stackedViews setFrame:CGRectMake(_minimumTabWidth, 0, CGRectGetWidth([self bounds]) - _minimumTabWidth, CGRectGetHeight([self bounds]))];
     }
 }
 
@@ -107,6 +85,8 @@
     [self addSubview:_stackedViews];
 
     [_stackedViews setAutoresizesSubviews:YES];
+    [_stackedViews setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
+    [_stackedViews setFrame:CGRectMake(_minimumTabWidth, 0, CGRectGetWidth([self bounds]) - _minimumTabWidth, CGRectGetHeight([self bounds]))];
 }
 
 
@@ -122,12 +102,6 @@
     [_rightMaskLayer setAnchorPoint:CGPointZero];
     [_rightMaskLayer setBackgroundColor:[[UIColor whiteColor] CGColor]];
     [_rightMaskLayer setCornerRadius:SNStackNavigationCornerRadius];
-}
-
-
-- (void)layoutSubviews
-{
-    [_stackedViews setFrame:CGRectMake(_minimumTabWidth, 0, CGRectGetWidth([self bounds]) - _minimumTabWidth, CGRectGetHeight([self bounds]))];
 }
 
 
