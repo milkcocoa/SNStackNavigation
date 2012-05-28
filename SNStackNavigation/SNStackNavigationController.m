@@ -313,7 +313,7 @@ typedef enum
         [[viewController view] setFrame:frame];
     }
 
-    if (CGRectGetMaxX(RIGHT_VIEW_FRAME) < CGRectGetWidth(STACKED_VIEWS_FRAME))
+    if (CGRectGetMaxX(RIGHT_VIEW_FRAME) < CGRectGetMaxX([STACKED_VIEWS bounds]))
     {
         [self _moveToState:_SNStackNavigationDragDirectionRight
                     bounce:NO];
@@ -772,6 +772,7 @@ typedef enum
                                 {
                                     LEFT_VIEW_SET_X(0);
                                     RIGHT_VIEW_SET_X(bounceLeftView ? RIGHT_VIEW_FOLDED_X : CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                    MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                 };
 
                                 if (bounce)
@@ -784,10 +785,12 @@ typedef enum
                                             {
                                                 LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
                                                 RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                             }
                                             else
                                             {
                                                 RIGHT_VIEW_SET_X(RIGHT_VIEW_FOLDED_X + _SNStackNavigationMoveOffset);
+                                                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                             }
                                         };
 
@@ -797,6 +800,7 @@ typedef enum
                                             {
                                                 LEFT_VIEW_SET_X(0);
                                                 RIGHT_VIEW_SET_X(bounceLeftView ? RIGHT_VIEW_FOLDED_X : CGRectGetMaxX(LEFT_VIEW_FRAME));
+                                                MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                             };
 
                                             DEFAULT_ANIMATION(bounceBackBlock, nil);
