@@ -613,7 +613,6 @@ typedef enum
                     {
                         animationBlock = ^(void)
                         {
-                            LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
                             RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                             MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                         };
@@ -624,8 +623,7 @@ typedef enum
                             {
                                 void (^bounceBlock)(void) = ^(void)
                                 {
-                                    MORE_LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
-                                    LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                                    LEFT_VIEW_SET_X(_SNStackNavigationMoveOffset);
                                     RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                                     MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                 };
@@ -634,8 +632,7 @@ typedef enum
                                 {
                                     void (^bounceBackBlock)(void) = ^(void)
                                     {
-                                        MORE_LEFT_VIEW_SET_X(0);
-                                        LEFT_VIEW_SET_X(CGRectGetMaxX(MORE_LEFT_VIEW_FRAME));
+                                        LEFT_VIEW_SET_X(0);
                                         RIGHT_VIEW_SET_X(CGRectGetMaxX(LEFT_VIEW_FRAME));
                                         MORE_RIGHT_VIEW_SET_X(CGRectGetMaxX(RIGHT_VIEW_FRAME));
                                     };
