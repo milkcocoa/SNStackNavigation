@@ -3,6 +3,7 @@
 //  StackedNavigationSample
 //
 //  Created by Shu Masuda on 2011/12/04.
+//  Copyright (c) 2012 Shu MASUDA. All rights reserved.
 //
 
 #import "SNStackNavigationController.h"

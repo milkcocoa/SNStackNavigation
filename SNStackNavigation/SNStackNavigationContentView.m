@@ -3,6 +3,7 @@
 //  StackNavigationSample
 //
 //  Created by Shu MASUDA on 2011/12/28.
+//  Copyright (c) 2012 Shu MASUDA. All rights reserved.
 //
 
 #import "SNStackNavigationContentView.h"
