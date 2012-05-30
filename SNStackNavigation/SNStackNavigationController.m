@@ -62,11 +62,11 @@ typedef enum
 #define MORE_RIGHT_VIEW_FRAME _VIEW_FRAME(MORE_RIGHT_VIEW)
 #define MORE_RIGHT_VIEW_SET_X(_x) _SET_VIEW_X(MORE_RIGHT_VIEW, _x)
 
-#define DEFAULT_ANIMATION(_animation, _completion) \
-    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration                                   \
-                          delay:0                                                                           \
-                        options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone   \
-                     animations:_animation                                                                  \
+#define DEFAULT_ANIMATION(_animation, _completion)                          \
+    [UIView animateWithDuration:_SNStackNavigationBounceAnimationDuration   \
+                          delay:0                                           \
+                        options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone | UIViewAnimationOptionBeginFromCurrentState \
+                     animations:_animation                                  \
                      completion:_completion];
 
 
@@ -311,7 +311,16 @@ typedef enum
         frame = [[viewController view] frame];
         frame.size.width = [viewController contentWidthForViewInStackNavigation];
 
-        [[viewController view] setFrame:frame];
+        void (^animations)(void) = ^(void)
+        {
+            [[viewController view] setFrame:frame];
+        };
+
+        [UIView animateWithDuration:duration
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone | UIViewAnimationOptionBeginFromCurrentState
+                         animations:animations
+                         completion:nil];
     }
 
     if (CGRectGetMaxX(RIGHT_VIEW_FRAME) < CGRectGetMaxX([STACKED_VIEWS bounds]))
